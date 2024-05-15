@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QF.BySoft.Entities\QF.BySoft.Entities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" />
+    <PackageReference Include="MetalHeaven.Agent.Shared.External" />
+    <PackageReference Include="MetalHeaven.ExternalDataContracts" />
+    <PackageReference Include="MetalHeaven.Integration.Shared" />
+  </ItemGroup>
+
+</Project>

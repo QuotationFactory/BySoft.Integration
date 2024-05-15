@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);VSTHRD200</NoWarn>
+    <!--
+  VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type (https://github.com/Microsoft/vs-threading/blob/main/doc/analyzers/VSTHRD200.md)
+  -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Moq.Contrib.HttpClient" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QF.BySoft.Manufacturability\QF.BySoft.Manufacturability.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="TestData\manufacturabilityRequest.json" />
+    <Content Include="TestData\manufacturabilityRequest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

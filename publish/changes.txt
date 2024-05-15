@@ -1,0 +1,28 @@
+2021-11-22
+- Fix: Delete part if exists before importing did not work 
+- Improvement: set the cutting machine name in the app settings
+
+
+2021-11-11
+- Improvement: option to set the CuttingTechonology
+
+2021-11-9
+- Fix: when running as a service the content root was system32 
+- Improvement: In case of a timeout, the app will retry 3 times.
+
+2021-11-4
+- Improvement: Added option "SavePartWithCombinedFileName" to import the step file with the name partId_partName.step
+- Improvement: Application can be run as a service
+
+2021-10-26
+- Fix: Import part delete part when already exists
+- Improvement: Increased time-out task to avoid lost checks
+- Improvements: URL encoding for parameters 
+- Improvement: API settings are being verified at start of check
+
+2022-05-07
+- extend amount of retries in retry policy
+
+2023-02-09
+- adds priority = 1 in UpdatePartInfoBody
+
