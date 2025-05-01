@@ -99,7 +99,8 @@ public static class SettingsExtension
 
         var destFileName = Path.Combine(subDirectoryPath, Path.GetFileName(filePath));
 
-        File.Move(filePath, destFileName);
+        File.Copy(filePath, destFileName, overwrite:true);
+        File.Delete(filePath);
 
         return destFileName;
     }
@@ -137,7 +138,8 @@ public static class SettingsExtension
                 $"{Path.GetFileNameWithoutExtension(destinationFilePath)} (1){Path.GetExtension(destinationFilePath)}");
         }
 
-        File.Move(filePath, result);
+        File.Copy(filePath, result, overwrite:true);
+        File.Delete(filePath);
 
         return result;
     }
