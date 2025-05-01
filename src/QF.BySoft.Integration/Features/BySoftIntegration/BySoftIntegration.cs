@@ -32,6 +32,7 @@ namespace QF.BySoft.Integration.Features.BySoftIntegration;
 public class BySoftIntegration : IBySoftIntegration
 {
     private readonly IAgentMessageSerializationHelper _agentMessageSerializationHelper;
+    private readonly HttpClient _httpClient;
     private readonly AgentSettings _agentSettings;
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
     private readonly IBySoftManufacturabilityCheckBending _bySoftManufacturabilityCheckBending;
@@ -42,12 +43,14 @@ public class BySoftIntegration : IBySoftIntegration
         IOptions<AgentSettings> agentSettings,
         IBySoftManufacturabilityCheckBending bySoftManufacturabilityCheckBending,
         IAgentMessageSerializationHelper agentMessageSerializationHelper,
-        IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings)
+        IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
+        HttpClient httpClient)
     {
         _logger = logger;
         _agentSettings = agentSettings.Value;
         _bySoftManufacturabilityCheckBending = bySoftManufacturabilityCheckBending;
         _agentMessageSerializationHelper = agentMessageSerializationHelper;
+        _httpClient = httpClient;
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
     }
 
@@ -150,7 +153,7 @@ public class BySoftIntegration : IBySoftIntegration
 
         try
         {
-            var fileBytes = await new HttpClient().GetByteArrayAsync(uri);
+            var fileBytes = await _httpClient.GetByteArrayAsync(uri);
             await File.WriteAllBytesAsync(outputPath, fileBytes);
         }
         catch (HttpRequestException e)

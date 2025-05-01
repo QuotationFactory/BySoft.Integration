@@ -57,10 +57,11 @@ public static class Program
             {
                 // register agent message serialization helper
                 services.AddTransient<IAgentMessageSerializationHelper, ExternalAgentMessageSerializationHelper>();
-                services.AddTransient<IBySoftIntegration, BySoftIntegration>();
+
                 services.AddTransient<IMachineMappingRepository, MachineMappingRepository>();
                 services.AddTransient<IMaterialMappingRepository, MaterialMappingRepository>();
                 services.AddTransient<IBySoftManufacturabilityCheckBending, BySoftManufacturabilityCheckBending>();
+                services.AddHttpClient<IBySoftIntegration, BySoftIntegration>();
                 services.AddHttpClient<IBySoftApi, BySoftApi>();
 
                 // register agent settings
