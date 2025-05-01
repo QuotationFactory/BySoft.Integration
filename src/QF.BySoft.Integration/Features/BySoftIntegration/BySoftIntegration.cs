@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MetalHeaven.Agent.Shared.External.Interfaces;
@@ -31,6 +32,7 @@ namespace QF.BySoft.Integration.Features.BySoftIntegration;
 public class BySoftIntegration : IBySoftIntegration
 {
     private readonly IAgentMessageSerializationHelper _agentMessageSerializationHelper;
+    private readonly HttpClient _httpClient;
     private readonly AgentSettings _agentSettings;
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
     private readonly IBySoftManufacturabilityCheckBending _bySoftManufacturabilityCheckBending;
@@ -41,12 +43,14 @@ public class BySoftIntegration : IBySoftIntegration
         IOptions<AgentSettings> agentSettings,
         IBySoftManufacturabilityCheckBending bySoftManufacturabilityCheckBending,
         IAgentMessageSerializationHelper agentMessageSerializationHelper,
-        IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings)
+        IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
+        HttpClient httpClient)
     {
         _logger = logger;
         _agentSettings = agentSettings.Value;
         _bySoftManufacturabilityCheckBending = bySoftManufacturabilityCheckBending;
         _agentMessageSerializationHelper = agentMessageSerializationHelper;
+        _httpClient = httpClient;
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
     }
 
@@ -84,7 +88,6 @@ public class BySoftIntegration : IBySoftIntegration
             }
 
             var stepDownloadDirectory = _agentSettings.GetStepDownloadDirectory(Constants.AgentIntegrationName);
-            var stepFileUrl = request.StepFileUrl;
             // The name of the step-file depends on the app setting SavePartWithCombinedFileName
             // If false: Step file name will have the same name as the part-id , with the extension .step
             // If true : Step file name will be partId_partName , with the extension .step
@@ -94,7 +97,7 @@ public class BySoftIntegration : IBySoftIntegration
             var stepFilePathName = Path.Combine(stepDownloadDirectory, $"{stepName}.step");
 
             // Download the step file sync
-            await DownloadStepFileAsync(stepFileUrl, stepFilePathName);
+            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, stepFilePathName);
             _logger.LogInformation("Downloaded step file: {StepFilePathName}", stepFilePathName);
 
             // Do manufacturability check with BySoft CAM API
@@ -141,14 +144,27 @@ public class BySoftIntegration : IBySoftIntegration
         }
     }
 
-    private async Task DownloadStepFileAsync(Uri stepFileUrl, string filePathName)
+    private async Task DownloadFileAsync(string uri, string outputPath)
     {
-        using var client = new HttpClient();
-        using var response = await client.GetAsync(stepFileUrl);
-        response.EnsureSuccessStatusCode();
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        await using var file = new FileStream(filePathName, FileMode.CreateNew);
-        await stream.CopyToAsync(file);
+        if (!Uri.TryCreate(uri, UriKind.Absolute, out _))
+        {
+            throw new InvalidOperationException("URI is invalid.");
+        }
+
+        try
+        {
+            var fileBytes = await _httpClient.GetByteArrayAsync(uri);
+            await File.WriteAllBytesAsync(outputPath, fileBytes);
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogError("Not authorized to download step file with URI: '{uri}'. " +
+                                 "Continuing in development for testing purposes...", uri);
+                throw new InvalidOperationException("Cannot continue without input file.", e);
+            }
+        }
     }
 
     private void ReportException(Exception ex, RequestManufacturabilityCheckOfPartTypeMessage request)
