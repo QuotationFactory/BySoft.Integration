@@ -33,7 +33,9 @@ public class AgentOutputFileWatcherService : FileWatcherService
         _logger.LogInformation("File watch added on: '{Directory}' with filter: *.json", directory);
     }
 
-    private void ProcessExistingFiles(string directory, string extensionfilter)
+#pragma warning disable VSTHRD100
+    private async void ProcessExistingFiles(string directory, string extensionfilter)
+#pragma warning restore VSTHRD100
     {
         var existingFiles = Directory.EnumerateFiles(directory).Where(x => Path.GetExtension(x) == extensionfilter).ToArray();
         if (!existingFiles.Any())
@@ -43,18 +45,20 @@ public class AgentOutputFileWatcherService : FileWatcherService
 
         foreach (var file in existingFiles)
         {
-            _mediator.Publish(new AgentOutputFileCreated(file)).ConfigureAwait(false).GetAwaiter().GetResult();
+            await _mediator.Publish(new AgentOutputFileCreated(file));
         }
     }
 
-    protected override void OnAllChanges(object sender, FileSystemEventArgs e)
+#pragma warning disable VSTHRD100
+    protected override async void OnAllChanges(object sender, FileSystemEventArgs e)
+#pragma warning restore VSTHRD100
     {
         try
         {
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
-                    _mediator.Publish(new AgentOutputFileCreated(e.FullPath)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    await _mediator.Publish(new AgentOutputFileCreated(e.FullPath));
                     break;
                 case WatcherChangeTypes.Deleted:
                     break;
