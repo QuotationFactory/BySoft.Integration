@@ -14,7 +14,7 @@ public class MaterialMappingRepository : IMaterialMappingRepository
 {
     private readonly string _applicationBasePath = ApplicationInfo.GetApplicationBasePath();
 
-    public string GetMaterialIdFromKeywords(IEnumerable<string> keywords)
+    public string GetMaterialCodeFromKeywords(IEnumerable<string> keywords)
     {
         if (keywords == null)
         {
@@ -28,13 +28,10 @@ public class MaterialMappingRepository : IMaterialMappingRepository
         }
 
         var mappingList = GetMaterialMapListForGroupKeywordMapping();
-
-        var materialId = GetMaterialIdFromKeywords(keywordsList, mappingList);
-
-        return materialId ?? string.Empty;
+        return GetMaterialCodeFromKeywords(keywordsList, mappingList);
     }
 
-    public string GetMaterialIdFromArticle(string materialId)
+    public string GetMaterialCodeFromArticle(string materialId)
     {
         if (string.IsNullOrWhiteSpace(materialId))
         {
@@ -111,25 +108,24 @@ public class MaterialMappingRepository : IMaterialMappingRepository
                 new MaterialMapModel
                 {
                     MaterialGroup = xlTableRow.Cell(colMaterialGroup).Value.ToString(),
-                    Keyword = xlTableRow.Cell(colKeyword).Value.ToString(),
+                    Keywords = xlTableRow.Cell(colKeyword).Value.ToString().Split([',',';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
                     BySoftCamMaterialCode = xlTableRow.Cell(bySoftCamMaterialCode).Value.ToString()
                 }).ToArray();
     }
 
-    private string GetMaterialIdFromKeywords(IEnumerable<string> keywords, IEnumerable<MaterialMapModel> mappingList)
+    private string GetMaterialCodeFromKeywords(IEnumerable<string> keywords, IEnumerable<MaterialMapModel> mappingList)
     {
-        // Find mapping rows where the keywords map with the material group
-        var inGroup = mappingList.Where(m => keywords.Contains(m.MaterialGroup, StringComparer.OrdinalIgnoreCase)).ToList();
-        if (inGroup.Any())
-        {
-            // Next find the rows where the mapping-keyword maps with the keywords
-            var foundKeyword = inGroup.Where(k => keywords.Contains(k.Keyword, StringComparer.OrdinalIgnoreCase)).ToList();
-            if (foundKeyword.Any())
-            {
-                return foundKeyword.First().BySoftCamMaterialCode;
-            }
-        }
+        // We want to find the BySoftCamMaterialCode where the keywords have the most overlap with the keywords in the mapping list
+        // We will first filter the mapping list to only include the keywords that are in the keywords list
+        // Then we will order  the mapping list ascending by the number of keywords that are in the keywords list
+        // this will result in the less overlapping keywords first
+        // We will then take the first one from the ordered list
+        // This will give us the BySoftCamMaterialCode that has the less but most overlap with the keywords list
+        var foundKeyword = mappingList
+            .Where(k => k.Keywords.Intersect(keywords, StringComparer.OrdinalIgnoreCase).Any())
+            .OrderBy(x=>x.Keywords.Length).ToList();
 
-        return string.Empty;
+        return foundKeyword.FirstOrDefault()?.BySoftCamMaterialCode ?? string.Empty;
+
     }
 }

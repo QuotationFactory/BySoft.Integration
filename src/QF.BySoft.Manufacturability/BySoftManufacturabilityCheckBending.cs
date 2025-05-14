@@ -146,7 +146,7 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
                     "MaterialKeywords are not set");
             }
 
-            var integrationMaterialId = _materialMappingRepository.GetMaterialIdFromKeywords(materialKeywords);
+            var integrationMaterialId = _materialMappingRepository.GetMaterialCodeFromKeywords(materialKeywords);
             if (string.IsNullOrWhiteSpace(integrationMaterialId))
             {
                 // Material not found in the repository, throw error
@@ -159,7 +159,7 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         else
         {
             var materialId = request.PartType.Material.SelectableArticles.SelectedArticle.Id;
-            var integrationMaterialId = _materialMappingRepository.GetMaterialIdFromArticle(materialId);
+            var integrationMaterialId = _materialMappingRepository.GetMaterialCodeFromArticle(materialId);
             if (string.IsNullOrWhiteSpace(integrationMaterialId))
             {
                 // Material not found in the repository, throw error
