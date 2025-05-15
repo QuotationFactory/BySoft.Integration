@@ -1,5 +1,5 @@
 using System.IO;
-using MetalHeaven.Integration.Shared.Classes;
+using QF.BySoft.Entities;
 
 namespace QF.BySoft.Integration.Features.AgentOutputFile;
 
@@ -22,73 +22,100 @@ public static class SettingsExtension
         return totalPath;
     }
 
-    private static string GetIntegrationRootDirectory(this AgentSettings settings, string integrationName)
+    public static string GetOrCreateAgentInputDirectory(this BySoftIntegrationSettings settings, string integrationName = "", bool createIfNotExists = false)
+    {
+        var inputDirectory = Path.Combine(settings.RootDirectory, integrationName, "Input");
+        return inputDirectory.DirectoryExistsOrCreate(createIfNotExists) ? inputDirectory : string.Empty;
+    }
+
+    public static string GetOrCreateAgentOutputDirectory(this BySoftIntegrationSettings settings, string integrationName = "", bool createIfNotExists = false)
+    {
+        var outputDirectory = Path.Combine(settings.RootDirectory, integrationName, "Output");
+        return outputDirectory.DirectoryExistsOrCreate(createIfNotExists) ? outputDirectory : string.Empty;
+    }
+
+    public static bool DirectoryExistsOrCreate(this string directory, bool createIfNotExists = false)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+            return false;
+
+        if (Directory.Exists(directory))
+            return true;
+
+        if (!createIfNotExists) return false;
+
+        Directory.CreateDirectory(directory);
+
+        return Directory.Exists(directory);
+    }
+
+    private static string GetIntegrationRootDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return Path.Combine(settings.RootDirectory, integrationName);
     }
 
 
-    public static string GetStepDownloadDirectory(this AgentSettings settings, string integrationName)
+    public static string GetStepDownloadDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(Path.Combine(GetIntegrationRootDirectory(settings, integrationName), "Output", "Step"));
     }
 
-    public static string GetInputDirectory(this AgentSettings settings, string integrationName)
+    public static string GetInputDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(Path.Combine(settings.RootDirectory, integrationName, "Input"));
     }
 
-    public static string GetInputSendDirectory(this AgentSettings settings, string integrationName)
+    public static string GetInputSendDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(Path.Combine(settings.RootDirectory, integrationName, "InputSend"));
     }
 
-    public static string GetOutputDirectory(this AgentSettings settings, string integrationName)
+    public static string GetOutputDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(Path.Combine(settings.RootDirectory, integrationName, "Output"));
     }
 
-    public static string GetProcessingDirectory(this AgentSettings settings, string integrationName)
+    public static string GetProcessingDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(settings.GetOutputDirectory(integrationName), "Processing");
     }
 
-    public static string GetProcessedDirectory(this AgentSettings settings, string integrationName)
+    public static string GetProcessedDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(settings.GetOutputDirectory(integrationName), "Processed");
     }
 
-    public static string GetErrorDirectory(this AgentSettings settings, string integrationName)
+    public static string GetErrorDirectory(this BySoftIntegrationSettings settings, string integrationName)
     {
         return GetOrCreateDirectory(settings.GetOutputDirectory(integrationName), "Error");
     }
 
-    public static string MoveFileToProcessing(this AgentSettings settings, string integrationName, string filePath)
+    public static string MoveFileToProcessing(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         return filePath.MoveFileToDirectory(settings.GetProcessingDirectory(integrationName));
     }
 
-    public static string MoveFileToProcessed(this AgentSettings settings, string integrationName, string filePath)
+    public static string MoveFileToProcessed(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         return filePath.MoveFileToDirectory(settings.GetProcessedDirectory(integrationName));
     }
 
-    public static string MoveFileToError(this AgentSettings settings, string integrationName, string filePath)
+    public static string MoveFileToError(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         return filePath.MoveFileToDirectory(settings.GetErrorDirectory(integrationName));
     }
 
-    public static string CopyFileToProcessed(this AgentSettings settings, string integrationName, string filePath)
+    public static string CopyFileToProcessed(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         return filePath.CopyFileToDirectory(settings.GetProcessedDirectory(integrationName));
     }
 
-    public static string CopyFileToError(this AgentSettings settings, string integrationName, string filePath)
+    public static string CopyFileToError(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         return filePath.CopyFileToDirectory(settings.GetErrorDirectory(integrationName));
     }
 
-    public static string MoveFileToAgentInput(this AgentSettings settings, string integrationName, string filePath)
+    public static string MoveFileToAgentInput(this BySoftIntegrationSettings settings, string integrationName, string filePath)
     {
         if (!File.Exists(filePath))
         {

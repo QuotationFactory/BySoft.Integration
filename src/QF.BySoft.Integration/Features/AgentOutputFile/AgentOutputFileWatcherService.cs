@@ -1,13 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using MediatR;
-using MetalHeaven.Integration.Shared.Classes;
-using MetalHeaven.Integration.Shared.Extensions;
-using MetalHeaven.Integration.Shared.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QF.BySoft.Entities;
+using QF.Integration.Common.FileWatcher;
 
 namespace QF.BySoft.Integration.Features.AgentOutputFile;
 
@@ -20,33 +17,18 @@ public class AgentOutputFileWatcherService : FileWatcherService
     private readonly ILogger<AgentOutputFileWatcherService> _logger;
     private readonly IMediator _mediator;
 
-    public AgentOutputFileWatcherService(IMediator mediator, IOptions<AgentSettings> options, ILogger<AgentOutputFileWatcherService> logger)
-        : base(options)
+    public AgentOutputFileWatcherService(
+        IMediator mediator,
+        IOptions<BySoftIntegrationSettings> options,
+        ILogger<AgentOutputFileWatcherService> logger)
     {
         _mediator = mediator;
         _logger = logger;
 
         // add file watcher to the agent output directory
-        var directory = AgentSettings.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
-        ProcessExistingFiles(directory, ".json");
+        var directory = options.Value.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
         AddFileWatcher(directory, "*.json");
         _logger.LogInformation("File watch added on: '{Directory}' with filter: *.json", directory);
-    }
-
-#pragma warning disable VSTHRD100
-    private async void ProcessExistingFiles(string directory, string extensionfilter)
-#pragma warning restore VSTHRD100
-    {
-        var existingFiles = Directory.EnumerateFiles(directory).Where(x => Path.GetExtension(x) == extensionfilter).ToArray();
-        if (!existingFiles.Any())
-        {
-            return;
-        }
-
-        foreach (var file in existingFiles)
-        {
-            await _mediator.Publish(new AgentOutputFileCreated(file));
-        }
     }
 
 #pragma warning disable VSTHRD100
@@ -61,12 +43,35 @@ public class AgentOutputFileWatcherService : FileWatcherService
                     await _mediator.Publish(new AgentOutputFileCreated(e.FullPath));
                     break;
                 case WatcherChangeTypes.Deleted:
-                    break;
                 case WatcherChangeTypes.Changed:
+                case WatcherChangeTypes.Renamed:
+                case WatcherChangeTypes.All:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while processing {Event} for file {FilePath}", e.ChangeType, e.FullPath);
+        }
+    }
+
+#pragma warning disable VSTHRD100
+    protected override async void OnExistingFile(object sender, FileSystemEventArgs e)
+#pragma warning restore VSTHRD100
+    {
+        try
+        {
+            switch (e.ChangeType)
+            {
+                case WatcherChangeTypes.Created:
+                case WatcherChangeTypes.Deleted:
+                case WatcherChangeTypes.Changed:
                 case WatcherChangeTypes.Renamed:
                     break;
                 case WatcherChangeTypes.All:
+                    await _mediator.Publish(new AgentOutputFileCreated(e.FullPath));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

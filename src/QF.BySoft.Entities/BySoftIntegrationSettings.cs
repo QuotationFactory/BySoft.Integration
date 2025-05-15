@@ -2,6 +2,8 @@
 
 public class BySoftIntegrationSettings
 {
+    public string RootDirectory { get; set; }
+
     // Unit of measurement. Can be mm or inch
     // This is for the Thickness of the material
     public string MachineUnitOfMeasurement { get; set; }

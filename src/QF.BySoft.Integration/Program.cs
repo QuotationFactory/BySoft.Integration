@@ -2,14 +2,13 @@ using System;
 using System.Reflection;
 using MetalHeaven.Agent.Shared.External.Classes;
 using MetalHeaven.Agent.Shared.External.Interfaces;
-using MetalHeaven.Integration.Shared.Classes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QF.BySoft.Entities;
 using QF.BySoft.Entities.Repositories;
-using QF.BySoft.Integration.Features.AgentOutputFile;
+using QF.BySoft.Integration.Extensions;
 using QF.BySoft.Integration.Features.BySoftIntegration;
 using QF.BySoft.LocalData;
 using QF.BySoft.LocalData.Helpers;
@@ -64,8 +63,6 @@ public static class Program
                 services.AddHttpClient<IBySoftIntegration, BySoftIntegration>();
                 services.AddHttpClient<IBySoftApi, BySoftApi>();
 
-                // register agent settings
-                services.AddOptions<AgentSettings>().Bind(hostContext.Configuration.GetSection("AgentSettings")).ValidateDataAnnotations();
                 // register integration settings
                 services.AddOptions<BySoftIntegrationSettings>().Bind(hostContext.Configuration.GetSection("BySoftIntegrationSettings"))
                     .ValidateDataAnnotations();
@@ -73,20 +70,14 @@ public static class Program
                 // Log settings, so that in case of debugging at the client, we know what settings were used
                 services.LogSettings();
 
-                // register agent output file watcher service
-                services.AddHostedService<AgentOutputFileWatcherService>();
-
-                // register MediatR with current assembly
-                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AgentOutputFileWatcherService).Assembly));
+                services.AddFileWatchFeature();
             });
     }
 
     private static void LogSettings(this IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
-        var agentSettings = serviceProvider.GetService<IOptions<AgentSettings>>()?.Value;
         var bySoftSettings = serviceProvider.GetService<IOptions<BySoftIntegrationSettings>>()?.Value;
-        Log.Information("Agent settings: {AgentSettings}", JsonConvert.SerializeObject(agentSettings));
         Log.Information("BySoft settings: {BySoftSettings}", JsonConvert.SerializeObject(bySoftSettings));
     }
 

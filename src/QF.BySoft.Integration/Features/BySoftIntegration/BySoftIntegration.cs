@@ -6,14 +6,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using MetalHeaven.Agent.Shared.External.Interfaces;
 using MetalHeaven.Agent.Shared.External.Messages;
-using MetalHeaven.Integration.Shared.Classes;
-using MetalHeaven.Integration.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QF.BySoft.Entities;
 using QF.BySoft.Integration.Features.AgentOutputFile;
 using QF.BySoft.Manufacturability.Interfaces;
+using QF.Integration.Common.Serialization;
 using Versioned.ExternalDataContracts;
 using Versioned.ExternalDataContracts.Contracts.Resource;
 using Versioned.ExternalDataContracts.Enums;
@@ -33,21 +32,18 @@ public class BySoftIntegration : IBySoftIntegration
 {
     private readonly IAgentMessageSerializationHelper _agentMessageSerializationHelper;
     private readonly HttpClient _httpClient;
-    private readonly AgentSettings _agentSettings;
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
     private readonly IBySoftManufacturabilityCheckBending _bySoftManufacturabilityCheckBending;
     private readonly ILogger<BySoftIntegration> _logger;
 
     public BySoftIntegration(
         ILogger<BySoftIntegration> logger,
-        IOptions<AgentSettings> agentSettings,
         IBySoftManufacturabilityCheckBending bySoftManufacturabilityCheckBending,
         IAgentMessageSerializationHelper agentMessageSerializationHelper,
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
         HttpClient httpClient)
     {
         _logger = logger;
-        _agentSettings = agentSettings.Value;
         _bySoftManufacturabilityCheckBending = bySoftManufacturabilityCheckBending;
         _agentMessageSerializationHelper = agentMessageSerializationHelper;
         _httpClient = httpClient;
@@ -87,7 +83,7 @@ public class BySoftIntegration : IBySoftIntegration
                 throw new ApplicationException("Deserializing request failed");
             }
 
-            var stepDownloadDirectory = _agentSettings.GetStepDownloadDirectory(Constants.AgentIntegrationName);
+            var stepDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.AgentIntegrationName);
             // The name of the step-file depends on the app setting SavePartWithCombinedFileName
             // If false: Step file name will have the same name as the part-id , with the extension .step
             // If true : Step file name will be partId_partName , with the extension .step
@@ -116,13 +112,13 @@ public class BySoftIntegration : IBySoftIntegration
                 await File.WriteAllTextAsync(tempFile, responseJson);
 
                 // Move the result file in the Agent/Integration/Input folder
-                _agentSettings.MoveFileToAgentInput(Constants.AgentIntegrationName, tempFile);
+                _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.AgentIntegrationName, tempFile);
 
                 _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
-                _agentSettings.MoveFileToProcessed(Constants.AgentIntegrationName, jsonFilePath);
+                _bySoftIntegrationSettings.MoveFileToProcessed(Constants.AgentIntegrationName, jsonFilePath);
 #if DEBUG
                 // Save in InputSend folder, for debugging
-                var agentInputHistoryFolder = _agentSettings.GetInputSendDirectory(Constants.AgentIntegrationName);
+                var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.AgentIntegrationName);
                 var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
                 await File.WriteAllTextAsync(responseFileHistory, responseJson);
 #endif
@@ -130,7 +126,7 @@ public class BySoftIntegration : IBySoftIntegration
             else
             {
                 _logger.LogWarning("Did not receive a valid result, could not return result");
-                _agentSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
+                _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
             }
 
             _logger.LogInformation("Finished processing file: {JsonFilePath}", jsonFilePath);
@@ -139,7 +135,7 @@ public class BySoftIntegration : IBySoftIntegration
         {
             _logger.LogError(ex, "Error processing file: {JsonFilePath}", jsonFilePath);
             // Do not move the file, but copy, see remark above
-            _agentSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
+            _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
             ReportException(ex, request);
         }
     }
@@ -191,7 +187,7 @@ public class BySoftIntegration : IBySoftIntegration
             }
         };
         response.EventLogs = logs;
-        var agentUploadFolder = _agentSettings.GetOrCreateAgentInputDirectory(Constants.AgentIntegrationName, true);
+        var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.AgentIntegrationName, true);
         // Save the result file in the Agent/CADMAN-B/Input folder
         var fileName = $"{response.PartTypeId.ToString()}.json";
         var responseFile = Path.Combine(agentUploadFolder, fileName);
