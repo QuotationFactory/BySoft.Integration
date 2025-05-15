@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <PackageReference Include="MetalHeaven.ExternalDataContracts" />
-    <PackageReference Include="MetalHeaven.Integration.Shared" />
     <PackageReference Include="MetalHeaven.Agent.Shared.External" />
   </ItemGroup>
 
@@ -41,6 +40,7 @@
   <ItemGroup>
     <ProjectReference Include="..\QF.BySoft.Manufacturability\QF.BySoft.Manufacturability.csproj" />
     <ProjectReference Include="..\QF.BySoft.LocalData\QF.BySoft.LocalData.csproj" />
+    <ProjectReference Include="..\QF.Integration.Common\QF.Integration.Common.csproj" />
   </ItemGroup>
 
 </Project>
