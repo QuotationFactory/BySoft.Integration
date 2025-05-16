@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
 {
     private readonly ILogger<AgentOutputFileWatcherService> _logger;
     private readonly IMediator _mediator;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public AgentOutputFileWatcherService(
         IMediator mediator,
@@ -26,7 +28,13 @@ public class AgentOutputFileWatcherService : FileWatcherService
         _logger = logger;
 
         // add file watcher to the agent output directory
-        var directory = options.Value.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
+        var bySoftIntegrationSettings = options.Value;
+        var directory = bySoftIntegrationSettings.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
+        if (bySoftIntegrationSettings.NumberOfConcurrentTasks > 1)
+        {
+            _semaphore = new(bySoftIntegrationSettings.NumberOfConcurrentTasks, bySoftIntegrationSettings.NumberOfConcurrentTasks);
+            _logger.LogInformation("Semaphore initialized with {NumberOfConcurrentTasks} concurrent tasks", bySoftIntegrationSettings.NumberOfConcurrentTasks);
+        }
         AddFileWatcher(directory, "*.json");
         _logger.LogInformation("File watch added on: '{Directory}' with filter: *.json", directory);
     }
@@ -37,6 +45,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
     {
         try
         {
+            await _semaphore.WaitAsync();
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
@@ -54,6 +63,10 @@ public class AgentOutputFileWatcherService : FileWatcherService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while processing {Event} for file {FilePath}", e.ChangeType, e.FullPath);
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 
@@ -63,6 +76,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
     {
         try
         {
+            await _semaphore.WaitAsync();
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
@@ -80,6 +94,10 @@ public class AgentOutputFileWatcherService : FileWatcherService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while processing {Event} for file {FilePath}", e.ChangeType, e.FullPath);
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 }

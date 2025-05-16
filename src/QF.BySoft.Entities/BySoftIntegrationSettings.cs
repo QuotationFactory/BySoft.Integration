@@ -54,4 +54,6 @@ public class BySoftIntegrationSettings
     ///     Some warnings should be seen as errors
     /// </summary>
     public string[] WarningsAsErrors { get; set; } = [];
+
+    public int NumberOfConcurrentTasks { get; set; }
 }
