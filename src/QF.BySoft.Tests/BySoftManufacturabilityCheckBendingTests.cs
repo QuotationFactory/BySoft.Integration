@@ -371,10 +371,10 @@ public class BySoftManufacturabilityCheckBendingTests
     {
         var materialRepositoryMock = new Mock<IMaterialMappingRepository>();
         materialRepositoryMock
-            .Setup(x => x.GetMaterialIdFromKeywords(It.IsAny<IEnumerable<string>>()))
+            .Setup(x => x.GetMaterialCodeFromKeywords(It.IsAny<IEnumerable<string>>()))
             .Returns(materialIntegration);
         materialRepositoryMock
-            .Setup(x => x.GetMaterialIdFromArticle(It.IsAny<string>()))
+            .Setup(x => x.GetMaterialCodeFromArticle(It.IsAny<string>()))
             .Returns(materialIntegration);
         return materialRepositoryMock;
     }

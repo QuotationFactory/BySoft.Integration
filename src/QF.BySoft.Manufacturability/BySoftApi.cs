@@ -91,7 +91,6 @@ public class BySoftApi : IBySoftApi
 
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
-        _logger.LogDebug("UpdatePartAsync. Url: {Url}", url);
         var content = new UpdatePartInfo
         {
             MaterialName = materialName,
@@ -101,6 +100,7 @@ public class BySoftApi : IBySoftApi
             Priority = "1"
         };
 
+        _logger.LogDebug("UpdatePartAsync. with materialName: '{materialName}', bendingMachineName:'{bendingMachineName}', cuttingMachineName: '{cuttingMachineName}' Url: {Url}", materialName, bendingMachineName, cuttingMachineName, url);
         var response = await _httpClient.PostAsJsonAsync(url, content);
         // Throws an error in not successful
         response.EnsureSuccessStatusCode();

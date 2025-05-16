@@ -4,7 +4,7 @@ namespace QF.BySoft.Entities.Repositories;
 
 public interface IMaterialMappingRepository
 {
-    string GetMaterialIdFromKeywords(IEnumerable<string> keywords);
+    string GetMaterialCodeFromKeywords(IEnumerable<string> keywords);
 
-    string GetMaterialIdFromArticle(string materialId);
+    string GetMaterialCodeFromArticle(string materialId);
 }
