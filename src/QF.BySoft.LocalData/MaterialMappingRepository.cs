@@ -123,7 +123,7 @@ public class MaterialMappingRepository : IMaterialMappingRepository
         // This will give us the BySoftCamMaterialCode that has the less but most overlap with the keywords list
         var foundKeyword = mappingList
             .Where(k => k.Keywords.Intersect(keywords, StringComparer.OrdinalIgnoreCase).Any())
-            .OrderBy(x=>x.Keywords.Length).ToList();
+            .OrderByDescending(x => x.Keywords.Intersect(keywords, StringComparer.OrdinalIgnoreCase).Count()).ToList();
 
         return foundKeyword.FirstOrDefault()?.BySoftCamMaterialCode ?? string.Empty;
 
