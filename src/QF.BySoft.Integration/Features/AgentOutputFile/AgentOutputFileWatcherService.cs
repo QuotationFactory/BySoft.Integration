@@ -32,7 +32,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
         var directory = bySoftIntegrationSettings.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
         if (bySoftIntegrationSettings.NumberOfConcurrentTasks > 1)
         {
-            _semaphore = new(1, bySoftIntegrationSettings.NumberOfConcurrentTasks);
+            _semaphore = new(bySoftIntegrationSettings.NumberOfConcurrentTasks, bySoftIntegrationSettings.NumberOfConcurrentTasks);
             _logger.LogInformation("Semaphore initialized with {NumberOfConcurrentTasks} concurrent tasks", bySoftIntegrationSettings.NumberOfConcurrentTasks);
         }
         AddFileWatcher(directory, "*.json");
