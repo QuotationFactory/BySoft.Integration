@@ -74,9 +74,9 @@ public class AgentOutputFileWatcherService : FileWatcherService
     protected override async void OnExistingFile(object sender, FileSystemEventArgs e)
 #pragma warning restore VSTHRD100
     {
-        await _semaphore.WaitAsync();
         try
         {
+            await _semaphore.WaitAsync();
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
