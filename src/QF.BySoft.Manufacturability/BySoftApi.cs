@@ -78,7 +78,7 @@ public class BySoftApi : IBySoftApi
     }
 
     public async Task UpdatePartAsync(string partUri, string materialName, string bendingMachineName, string cuttingMachineName,
-        double thickness)
+        double thickness, int?[] rotationAllowance)
     {
         // Example call
         // http://localhost:56111/api/v1/Parts/Update?uri=box%3A%2F%2FParts%2FAPI%2Fmh-test%2Fproject-x%2398a5641f-efa2-44b1-a51f-11dbbdb440d8
@@ -97,7 +97,8 @@ public class BySoftApi : IBySoftApi
             CuttingMachineName = cuttingMachineName,
             BendingMachineName = bendingMachineName,
             Thickness = thickness,
-            Priority = "1"
+            Priority = "1",
+            RotationAllowance = rotationAllowance
         };
 
         _logger.LogDebug("UpdatePartAsync. with materialName: '{materialName}', bendingMachineName:'{bendingMachineName}', cuttingMachineName: '{cuttingMachineName}' Url: {Url}", materialName, bendingMachineName, cuttingMachineName, url);
