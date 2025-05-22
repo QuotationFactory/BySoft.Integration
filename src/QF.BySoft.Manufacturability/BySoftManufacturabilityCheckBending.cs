@@ -49,11 +49,7 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
     {
         CheckApiSettings();
-        // Retrieve from the request object
-        var materialName = GetMaterialName(request);
-        var bendingMachineName = GetBendingMachineName(request);
-        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
-        var thickness = GetThickness(request);
+
         // TODO: should this be an app setting??
         const string subDirectory = "manufacturability-check";
         var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
@@ -71,8 +67,14 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
             throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
         }
 
+        // Retrieve from the request object
+        var materialName = GetMaterialName(request);
+        var bendingMachineName = GetBendingMachineName(request);
+        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
+        var thickness = GetThickness(request);
+        var rotationAllowance = GetRotationAllowance(request.PartType.NestingDirection);
         // 3. Update part with material and machine info
-        await _bySoftApi.UpdatePartAsync(partUri, materialName, bendingMachineName, cuttingMachineName, thickness);
+        await _bySoftApi.UpdatePartAsync(partUri, materialName, bendingMachineName, cuttingMachineName, thickness, rotationAllowance);
 
         // 4. Add Bending technology => This is also the *initial* check of manufacturability
         await _bySoftApi.SetBendingTechnologyAsync(partUri);
@@ -97,6 +99,19 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         var response = CreateResponse(request, checkPartResult);
 
         return response;
+    }
+
+    private int?[] GetRotationAllowance(NestingDirectionV1 nestingDirection)
+    {
+        // RotationAllowance are only used for bending
+        // If the part is not rotated, we do not need to set the rotation allowance
+        // If the part is rotated, we need to set the rotation allowance
+
+        if (nestingDirection is NestingDirectionV1.X or NestingDirectionV1.Y)
+        {
+            return [180];
+        }
+        return null;
     }
 
     private async Task DeleteExistingPartAsync(string partName, string subDirectory)
