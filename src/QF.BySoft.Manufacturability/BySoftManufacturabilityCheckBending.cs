@@ -10,6 +10,7 @@ using QF.BySoft.Entities;
 using QF.BySoft.Entities.Repositories;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.BySoft.Manufacturability.Models;
+using Versioned.ExternalDataContracts.Contracts.BoM;
 using Versioned.ExternalDataContracts.Contracts.Resource;
 using Versioned.ExternalDataContracts.Enums;
 
@@ -49,11 +50,7 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
     {
         CheckApiSettings();
-        // Retrieve from the request object
-        var materialName = GetMaterialName(request);
-        var bendingMachineName = GetBendingMachineName(request);
-        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
-        var thickness = GetThickness(request);
+
         // TODO: should this be an app setting??
         const string subDirectory = "manufacturability-check";
         var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
@@ -71,8 +68,14 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
             throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
         }
 
+        // Retrieve from the request object
+        var materialName = GetMaterialName(request);
+        var bendingMachineName = GetBendingMachineName(request);
+        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
+        var thickness = GetThickness(request);
+        var rotationAllowance = GetRotationAllowance(request.PartType);
         // 3. Update part with material and machine info
-        await _bySoftApi.UpdatePartAsync(partUri, materialName, bendingMachineName, cuttingMachineName, thickness);
+        await _bySoftApi.UpdatePartAsync(partUri, materialName, bendingMachineName, cuttingMachineName, thickness, rotationAllowance);
 
         // 4. Add Bending technology => This is also the *initial* check of manufacturability
         await _bySoftApi.SetBendingTechnologyAsync(partUri);
@@ -97,6 +100,36 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         var response = CreateResponse(request, checkPartResult);
 
         return response;
+    }
+
+    private int? GetRotationAllowance(PartTypeV1 partType)
+    {
+        // when part has no sheet cutting activities we do not set rotation allowance
+        if (partType.Activities.All(x => x.WorkingStepType is not WorkingStepTypeV1.SheetCutting))
+        {
+            return null;
+        }
+
+        // RotationAllowance is a property of the part type, which is used to determine if the part can be rotated during nesting
+        // when the PartType.NestingDirection is X or Y, then we expect this as a user defined value
+        // we handle this as if it is a rotation allowance for the part with surface treatment
+        if (partType.NestingDirection is NestingDirectionV1.X or NestingDirectionV1.Y)
+        {
+            return _bySoftIntegrationSettings.RotationAllowancePartWithSurfaceTreatment;
+        }
+
+        var keywords = _bySoftIntegrationSettings.KeywordsForPartWithSurfaceTreatment;
+        var partHasSurfaceTreatment = partType.Material.SelectableArticles.SelectedArticle?.Tokens
+            .Any(x => keywords.Contains(x, StringComparer.OrdinalIgnoreCase)) ?? false;
+        if(partHasSurfaceTreatment)
+        {
+            // If the part has surface treatment, we use the rotation allowance for parts with surface treatment
+            return _bySoftIntegrationSettings.RotationAllowancePartWithSurfaceTreatment;
+        }
+
+        // If the part has bending activities, we use the rotation allowance for parts with bending
+        var hasBendingActivities = partType.Activities.Any(x => x.WorkingStepType is WorkingStepTypeV1.SheetBending);
+        return hasBendingActivities ? _bySoftIntegrationSettings.RotationAllowancePartWithBending : _bySoftIntegrationSettings.RotationAllowancePartWithoutBending;
     }
 
     private async Task DeleteExistingPartAsync(string partName, string subDirectory)
