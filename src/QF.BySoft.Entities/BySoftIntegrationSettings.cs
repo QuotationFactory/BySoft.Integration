@@ -56,4 +56,29 @@ public class BySoftIntegrationSettings
     public string[] WarningsAsErrors { get; set; } = [];
 
     public int NumberOfConcurrentTasks { get; set; }
+
+    /// <summary>
+    /// The Rotation allowance for parts without bending can be configured.
+    /// Default value is 1 degree.
+    /// </summary>
+    public int RotationAllowancePartWithoutBending { get; set; } = 1;
+    /// <summary>
+    /// The Rotation allowance for parts with bending can be configured.
+    /// Default value is 90 degrees.
+    /// </summary>
+    public int RotationAllowancePartWithBending { get; set; } = 90;
+    /// <summary>
+    /// The Rotation allowance for parts with surface treatment can be configured.
+    /// Default value is 180 degrees.
+    /// </summary>
+    public int RotationAllowancePartWithSurfaceTreatment { get; set; } = 180;
+    /// <summary>
+    /// This is the list of keywords that are used to identify that the material used contains surface treatment.
+    /// we recommend to use keywords like
+    /// "laser foil", "double foil", "mirror 8", "5wl", "6wl", "cd-overlay", "circle polished", "centerless grinded", "steel look"
+    /// "varnished", "leather structure","stucco design","rice grain structure", "centerless grinded", "one-sided grinding","double-sided grinding"
+    /// </summary>
+    public string [] KeywordsForPartWithSurfaceTreatment { get; set; } =
+    ["laser foil", "double foil", "mirror 8", "5wl", "6wl", "cd-overlay", "circle polished", "centerless grinded", "steel look",
+        "varnished", "leather structure", "stucco design", "rice grain structure", "centerless grinded", "one-sided grinding", "double-sided grinding"];
 }

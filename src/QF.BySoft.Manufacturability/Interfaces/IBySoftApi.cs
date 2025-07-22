@@ -7,7 +7,7 @@ public interface IBySoftApi
 {
     Task ImportPartAsync(string path, string subDirectory, bool secondTry = false);
     Task<string> GetUriFromPartNameAsync(string partName, string subDirectory);
-    Task UpdatePartAsync(string partUri, string materialName, string bendingMachineName, string cuttingMachineName, double thickness);
+    Task UpdatePartAsync(string partUri, string materialName, string bendingMachineName, string cuttingMachineName, double thickness, int? rotationAllowance);
     Task<SetTechnologyResponse> SetBendingTechnologyAsync(string partUri);
     Task DeletePartAsync(string partUri);
     Task SetCuttingTechnologyAsync(string partUri);

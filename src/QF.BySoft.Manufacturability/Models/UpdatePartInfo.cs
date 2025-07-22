@@ -12,4 +12,5 @@ public class UpdatePartInfo
     public string BendingMachineName { get; set; }
     public double Thickness { get; set; }
     public string Priority { get; set; }
+    public int? RotationAllowance { get; set; }
 }

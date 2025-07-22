@@ -134,7 +134,7 @@ public class BySoftApiTests
         );
 
         // Act
-        var act = () => sut.UpdatePartAsync(_partNameResult.First(), "", "", "", 1);
+        var act = () => sut.UpdatePartAsync(_partNameResult.First(), "", "", "", 1, null);
 
         // Assert
         await act
