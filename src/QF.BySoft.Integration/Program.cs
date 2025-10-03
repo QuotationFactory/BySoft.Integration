@@ -59,7 +59,7 @@ public static class Program
 
                 services.AddTransient<IMachineMappingRepository, MachineMappingRepository>();
                 services.AddTransient<IMaterialMappingRepository, MaterialMappingRepository>();
-                services.AddTransient<IBySoftManufacturabilityCheckBending, BySoftManufacturabilityCheckBending>();
+                services.AddTransient<IBySoftManufacturabilityCheck, BySoftManufacturabilityCheck>();
                 services.AddHttpClient<IBySoftIntegration, BySoftIntegration>();
                 services.AddHttpClient<IBySoftApi, BySoftApi>();
 

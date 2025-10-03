@@ -97,12 +97,20 @@ public class BySoftApi : IBySoftApi
         var content = new UpdatePartInfo
         {
             MaterialName = materialName,
-            CuttingMachineName = cuttingMachineName,
-            BendingMachineName = bendingMachineName,
             Thickness = thickness,
             Priority = "1",
             RotationAllowance = rotationAllowance
         };
+
+        if (!string.IsNullOrWhiteSpace(bendingMachineName))
+        {
+            content.BendingMachineName = bendingMachineName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(cuttingMachineName))
+        {
+            content.CuttingMachineName = cuttingMachineName;
+        }
 
         _logger.LogDebug("UpdatePartAsync. with materialName: '{materialName}', bendingMachineName:'{bendingMachineName}', cuttingMachineName: '{cuttingMachineName}' Url: {Url}", materialName, bendingMachineName, cuttingMachineName, url);
         var response = await _httpClient.PostAsJsonAsync(url, content);

@@ -18,12 +18,12 @@ using Xunit;
 
 namespace QF.BySoft.Tests;
 
-public class BySoftManufacturabilityCheckBendingTests
+public class BySoftManufacturabilityCheckTests
 {
     // BySoft API variables for Mock
     private const string StepFilePathName = "C:\\temp\\step.step";
     private const string SubDirectory = "manufacturability-check";
-    private readonly Mock<ILogger<BySoftManufacturabilityCheckBending>> _mockLogger;
+    private readonly Mock<ILogger<BySoftManufacturabilityCheck>> _mockLogger;
     private readonly Guid _partIdValue;
 
     private readonly string _partNameResult;
@@ -38,10 +38,10 @@ public class BySoftManufacturabilityCheckBendingTests
     private string _materialIntegration;
     private double _thickNess;
 
-    public BySoftManufacturabilityCheckBendingTests()
+    public BySoftManufacturabilityCheckTests()
     {
         // The constructor runs for every test, so variables will be reset before each test.
-        _mockLogger = new Mock<ILogger<BySoftManufacturabilityCheckBending>>();
+        _mockLogger = new Mock<ILogger<BySoftManufacturabilityCheck>>();
         _projectIdValue = Guid.NewGuid();
         _partIdValue = Guid.NewGuid();
         _thickNess = 0.3;
@@ -68,7 +68,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -102,7 +102,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -144,7 +144,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -177,7 +177,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -210,7 +210,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -243,7 +243,7 @@ public class BySoftManufacturabilityCheckBendingTests
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -282,7 +282,7 @@ public class BySoftManufacturabilityCheckBendingTests
         // Overwrite the BendingTech
         var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
@@ -320,7 +320,7 @@ public class BySoftManufacturabilityCheckBendingTests
 
         var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
 
-        var sut = new BySoftManufacturabilityCheckBending(
+        var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,

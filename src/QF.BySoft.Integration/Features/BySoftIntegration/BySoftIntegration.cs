@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,7 +15,6 @@ using QF.BySoft.Integration.Features.AgentOutputFile;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.Integration.Common.Serialization;
 using Versioned.ExternalDataContracts;
-using Versioned.ExternalDataContracts.Contracts.Resource;
 using Versioned.ExternalDataContracts.Enums;
 using Constants = QF.BySoft.Entities.Constants;
 
@@ -22,8 +22,10 @@ namespace QF.BySoft.Integration.Features.BySoftIntegration;
 
 /// <summary>
 ///     BySoft import is used to export information received from Quotation Factory to BySoft.
-///     We import the dxf to BySoft. When the dxf is in BySoft the operator can send
-///     the dxf directly to the machine.
+///     We import the geometry file into BySoft. When the geometry is in BySoft the operator can use BySoft CAM to
+///     tool the part and create a manufacturing process.
+///     The manufacturability check is done in BySoft CAM.
+///     The result is exported back to Quotation Factory.
 /// </summary>
 /// <remarks>
 ///     The code in this function is the code that is executed by the agent.
@@ -33,18 +35,18 @@ public class BySoftIntegration : IBySoftIntegration
     private readonly IAgentMessageSerializationHelper _agentMessageSerializationHelper;
     private readonly HttpClient _httpClient;
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
-    private readonly IBySoftManufacturabilityCheckBending _bySoftManufacturabilityCheckBending;
+    private readonly IBySoftManufacturabilityCheck _bySoftApi;
     private readonly ILogger<BySoftIntegration> _logger;
 
     public BySoftIntegration(
         ILogger<BySoftIntegration> logger,
-        IBySoftManufacturabilityCheckBending bySoftManufacturabilityCheckBending,
+        IBySoftManufacturabilityCheck bySoftApi,
         IAgentMessageSerializationHelper agentMessageSerializationHelper,
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
         HttpClient httpClient)
     {
         _logger = logger;
-        _bySoftManufacturabilityCheckBending = bySoftManufacturabilityCheckBending;
+        _bySoftApi = bySoftApi;
         _agentMessageSerializationHelper = agentMessageSerializationHelper;
         _httpClient = httpClient;
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
@@ -97,7 +99,10 @@ public class BySoftIntegration : IBySoftIntegration
             _logger.LogInformation("Downloaded step file: {StepFilePathName}", stepFilePathName);
 
             // Do manufacturability check with BySoft CAM API
-            var result = await _bySoftManufacturabilityCheckBending.ManufacturabilityCheckBendingAsync(request, stepFilePathName);
+            var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
+            var result = containsBending
+                ? await _bySoftApi.ManufacturabilityCheckBendingAsync(request, stepFilePathName)
+                : await _bySoftApi.ManufacturabilityCheckCuttingAsync(request, stepFilePathName);
 
             if (result != null)
             {
