@@ -303,9 +303,6 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         {
             ProjectId = request.ProjectId,
             PartTypeId = request.PartType.Id,
-            WorkingStepKey = new WorkingStepKeyV1(
-                WorkingStepTypeV1.SheetBending,
-                WorkingStepTypeV1.SheetBending),
             IsManufacturable = isManufacturable,
             EventLogs = BuildEventLog(request, checkPartResult)
         };

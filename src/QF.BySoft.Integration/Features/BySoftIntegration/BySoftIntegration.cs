@@ -173,7 +173,6 @@ public class BySoftIntegration : IBySoftIntegration
         var response = new RequestManufacturabilityCheckOfPartTypeMessageResponse();
         response.ProjectId = request.ProjectId;
         response.PartTypeId = request.PartType.Id;
-        response.WorkingStepKey = new WorkingStepKeyV1(WorkingStepTypeV1.SheetBending, WorkingStepTypeV1.SheetBending);
         response.IsManufacturable = false;
         var logs = new List<EventLog>
         {
