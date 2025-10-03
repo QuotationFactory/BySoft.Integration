@@ -11,12 +11,11 @@ using QF.BySoft.Entities.Repositories;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.BySoft.Manufacturability.Models;
 using Versioned.ExternalDataContracts.Contracts.BoM;
-using Versioned.ExternalDataContracts.Contracts.Resource;
 using Versioned.ExternalDataContracts.Enums;
 
 namespace QF.BySoft.Manufacturability;
 
-public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheckBending
+public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 {
     // Machine unit of measurement, important for the Thickness of the material
     private const string MachineUnitOfMeasurementMillimeters = "mm";
@@ -27,15 +26,15 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
     private readonly IBySoftApi _bySoftApi;
 
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
-    private readonly ILogger<BySoftManufacturabilityCheckBending> _logger;
+    private readonly ILogger<BySoftManufacturabilityCheck> _logger;
     private readonly IMachineMappingRepository _machineMappingRepository;
     private readonly IMaterialMappingRepository _materialMappingRepository;
 
-    public BySoftManufacturabilityCheckBending(
+    public BySoftManufacturabilityCheck(
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
         IMachineMappingRepository machineMappingRepository,
         IMaterialMappingRepository materialMappingRepository,
-        ILogger<BySoftManufacturabilityCheckBending> logger,
+        ILogger<BySoftManufacturabilityCheck> logger,
         IBySoftApi bySoftApi
     )
     {
@@ -46,12 +45,63 @@ public class BySoftManufacturabilityCheckBending : IBySoftManufacturabilityCheck
         _bySoftApi = bySoftApi;
     }
 
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
+    {
+        CheckApiSettings();
+
+        const string subDirectory = "manufacturability-check";
+        var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
+
+        // 0. Delete part if it already exists
+        await DeleteExistingPartAsync(partName, subDirectory);
+
+        // 1. Create part from file
+        await _bySoftApi.ImportPartAsync(stepFilePathName, subDirectory);
+
+        // 2. Get the Uri of the part
+        var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
+        if (string.IsNullOrWhiteSpace(partUri))
+        {
+            throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
+        }
+
+        // Retrieve from the request object
+        var materialName = GetMaterialName(request);
+        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
+        var thickness = GetThickness(request);
+        var rotationAllowance = GetRotationAllowance(request.PartType);
+        // 3. Update part with material and machine info
+        await _bySoftApi.UpdatePartAsync(partUri, materialName, string.Empty, cuttingMachineName, thickness, rotationAllowance);
+
+        // 4b. Set the cutting technology => We do not check the manufacturability of this
+        // We only set it, for customers that save the part in the database
+        if (_bySoftIntegrationSettings.SetCuttingTechnology)
+        {
+            await _bySoftApi.SetCuttingTechnologyAsync(partUri);
+        }
+
+        // 4c. Check part for manufacturability states
+        var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
+
+
+        // 5. Delete part
+        if (!_bySoftIntegrationSettings.SavePartInBySoft)
+        {
+            await _bySoftApi.DeletePartAsync(partUri);
+        }
+
+        // 6. Create response
+        var response = CreateResponse(request, checkPartResult);
+
+        return response;
+
+    }
+
     public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckBendingAsync(
         RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
     {
         CheckApiSettings();
 
-        // TODO: should this be an app setting??
         const string subDirectory = "manufacturability-check";
         var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
 
