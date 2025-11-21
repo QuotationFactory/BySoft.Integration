@@ -89,20 +89,22 @@ public class BySoftIntegration : IBySoftIntegration
             // The name of the step-file depends on the app setting SavePartWithCombinedFileName
             // If false: Step file name will have the same name as the part-id , with the extension .step
             // If true : Step file name will be partId_partName , with the extension .step
-            var stepName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
-                ? $"{request.PartType.Id.ToString()}_{request.PartType.Name}"
-                : request.PartType.Id.ToString();
-            var stepFilePathName = Path.Combine(stepDownloadDirectory, $"{stepName}.step");
+            var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(request.StepFileUrl.AbsolutePath);
+            var originalFileNameExtension = Path.GetExtension(request.StepFileUrl.AbsolutePath);
+            var inputFileName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
+                ? $"{request.PartType.Id.ToString()}_{originalFileNameWithoutExtension}{originalFileNameExtension}"
+                : $"{request.PartType.Id.ToString()}{originalFileNameExtension}";
+            var inputFileNamePath = Path.Combine(stepDownloadDirectory, inputFileName);
 
             // Download the step file sync
-            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, stepFilePathName);
-            _logger.LogInformation("Downloaded step file: {StepFilePathName}", stepFilePathName);
+            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, inputFileNamePath);
+            _logger.LogInformation("Downloaded step file: {StepFilePathName}", inputFileNamePath);
 
             // Do manufacturability check with BySoft CAM API
             var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
             var result = containsBending
-                ? await _bySoftApi.ManufacturabilityCheckBendingAsync(request, stepFilePathName)
-                : await _bySoftApi.ManufacturabilityCheckCuttingAsync(request, stepFilePathName);
+                ? await _bySoftApi.ManufacturabilityCheckBendingAsync(request, inputFileNamePath)
+                : await _bySoftApi.ManufacturabilityCheckCuttingAsync(request, inputFileNamePath);
 
             if (result != null)
             {
