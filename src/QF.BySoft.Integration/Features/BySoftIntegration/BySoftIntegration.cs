@@ -85,7 +85,7 @@ public class BySoftIntegration : IBySoftIntegration
                 throw new ApplicationException("Deserializing request failed");
             }
 
-            var stepDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.AgentIntegrationName);
+            var stepDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.IntegrationName);
             // The name of the step-file depends on the app setting SavePartWithCombinedFileName
             // If false: Step file name will have the same name as the part-id , with the extension .step
             // If true : Step file name will be partId_partName , with the extension .step
@@ -119,13 +119,13 @@ public class BySoftIntegration : IBySoftIntegration
                 await File.WriteAllTextAsync(tempFile, responseJson);
 
                 // Move the result file in the Agent/Integration/Input folder
-                _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.AgentIntegrationName, tempFile);
+                _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.IntegrationName, tempFile);
 
                 _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
-                _bySoftIntegrationSettings.MoveFileToProcessed(Constants.AgentIntegrationName, jsonFilePath);
+                _bySoftIntegrationSettings.MoveFileToProcessed(Constants.IntegrationName, jsonFilePath);
 #if DEBUG
                 // Save in InputSend folder, for debugging
-                var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.AgentIntegrationName);
+                var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.IntegrationName);
                 var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
                 await File.WriteAllTextAsync(responseFileHistory, responseJson);
 #endif
@@ -133,7 +133,7 @@ public class BySoftIntegration : IBySoftIntegration
             else
             {
                 _logger.LogWarning("Did not receive a valid result, could not return result");
-                _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
+                _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
             }
 
             _logger.LogInformation("Finished processing file: {JsonFilePath}", jsonFilePath);
@@ -142,7 +142,7 @@ public class BySoftIntegration : IBySoftIntegration
         {
             _logger.LogError(ex, "Error processing file: {JsonFilePath}", jsonFilePath);
             // Do not move the file, but copy, see remark above
-            _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
+            _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
             ReportException(ex, request);
         }
     }
@@ -195,7 +195,7 @@ public class BySoftIntegration : IBySoftIntegration
             }
         };
         response.EventLogs = logs;
-        var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.AgentIntegrationName, true);
+        var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.IntegrationName, true);
         var fileName = $"{response.PartTypeId.ToString()}.json";
         var responseFile = Path.Combine(agentUploadFolder, fileName);
         File.WriteAllText(responseFile, JsonConvert.SerializeObject(response));

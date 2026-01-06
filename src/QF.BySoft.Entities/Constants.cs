@@ -3,7 +3,7 @@
 public static class Constants
 {
     /// <summary>
-    ///     Integration name, used for the location of the input/output folders or the Agent
+    ///     Integration name, used for the location of the input/output folders
     /// </summary>
-    public const string AgentIntegrationName = "BySoft Cam";
+    public const string IntegrationName = "BySoft Cam";
 }
