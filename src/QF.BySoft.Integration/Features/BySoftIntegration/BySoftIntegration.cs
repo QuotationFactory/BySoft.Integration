@@ -85,16 +85,22 @@ public class BySoftIntegration : IBySoftIntegration
                 throw new ApplicationException("Deserializing request failed");
             }
 
-            var stepDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.IntegrationName);
+            var geometryDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.IntegrationName);
             // The name of the step-file depends on the app setting SavePartWithCombinedFileName
             // If false: Step file name will have the same name as the part-id , with the extension .step
             // If true : Step file name will be partId_partName , with the extension .step
-            var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(request.StepFileUrl.AbsolutePath);
-            var originalFileNameExtension = Path.GetExtension(request.StepFileUrl.AbsolutePath);
+            var originalFileNameExtension = Path.GetExtension(request.PartType.OriginalFileName);
+            var originalFileName = request.PartType.AssemblyId == Constants.AssemblyIdRepresentingIndividualParts
+                ? request.PartType.OriginalFileName
+                : $"{request.PartType.Name}{originalFileNameExtension}";
+            var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
+            // Replace invalid file name characters
+            originalFileNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+
             var inputFileName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
                 ? $"{request.PartType.Id.ToString()}_{originalFileNameWithoutExtension}{originalFileNameExtension}"
                 : $"{request.PartType.Id.ToString()}{originalFileNameExtension}";
-            var inputFileNamePath = Path.Combine(stepDownloadDirectory, inputFileName);
+            var inputFileNamePath = Path.Combine(geometryDownloadDirectory, inputFileName);
 
             // Download the step file sync
             await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, inputFileNamePath);
