@@ -177,16 +177,18 @@ public class BySoftIntegration : IBySoftIntegration
             return;
         }
 
-        var response = new RequestManufacturabilityCheckOfPartTypeMessageResponse();
-        response.ProjectId = request.ProjectId;
-        response.PartTypeId = request.PartType.Id;
-        response.IsManufacturable = false;
+        var response = new RequestManufacturabilityCheckOfPartTypeMessageResponse
+        {
+            ProjectId = request.ProjectId,
+            PartTypeId = request.PartType.Id,
+            IsManufacturable = false
+        };
         var logs = new List<EventLog>
         {
             new()
             {
                 DateTime = DateTime.UtcNow,
-                Message = $"Error. {ex.Message}",
+                Message = $"Error. {ex.Message} {ex.InnerException}",
                 Level = EventLogLevel.Error,
                 ProjectId = request.ProjectId,
                 PartTypeId = request.PartType.Id
@@ -194,7 +196,6 @@ public class BySoftIntegration : IBySoftIntegration
         };
         response.EventLogs = logs;
         var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.AgentIntegrationName, true);
-        // Save the result file in the Agent/CADMAN-B/Input folder
         var fileName = $"{response.PartTypeId.ToString()}.json";
         var responseFile = Path.Combine(agentUploadFolder, fileName);
         File.WriteAllText(responseFile, JsonConvert.SerializeObject(response));

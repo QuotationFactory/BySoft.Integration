@@ -29,6 +29,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     private readonly ILogger<BySoftManufacturabilityCheck> _logger;
     private readonly IMachineMappingRepository _machineMappingRepository;
     private readonly IMaterialMappingRepository _materialMappingRepository;
+    private readonly string[] _warningsAsErrors;
 
     public BySoftManufacturabilityCheck(
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
@@ -43,20 +44,21 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _materialMappingRepository = materialMappingRepository;
         _logger = logger;
         _bySoftApi = bySoftApi;
+        _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
     {
         CheckApiSettings();
 
-        const string subDirectory = "manufacturability-check";
-        var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
+        var partName = Path.GetFileNameWithoutExtension(geometryFilePathName);
+        var subDirectory = GetSubDirectory(request);
 
         // 0. Delete part if it already exists
         await DeleteExistingPartAsync(partName, subDirectory);
 
         // 1. Create part from file
-        await _bySoftApi.ImportPartAsync(stepFilePathName, subDirectory);
+        await _bySoftApi.ImportPartAsync(geometryFilePathName, subDirectory);
 
         // 2. Get the Uri of the part
         var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
@@ -67,11 +69,23 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 
         // Retrieve from the request object
         var materialName = GetMaterialName(request);
-        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
         var thickness = GetThickness(request);
         var rotationAllowance = GetRotationAllowance(request.PartType);
         // 3. Update part with material and machine info
-        await _bySoftApi.UpdatePartAsync(partUri, materialName, string.Empty, cuttingMachineName, thickness, rotationAllowance);
+        var args = new UpdatePartArgs()
+        {
+            Description = GetDescription(request),
+            MaterialName = materialName,
+            BendingMachineName = string.Empty,// No bending machine for cutting only
+            CuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
+            ? GetCuttingMachineName(request)
+            : _bySoftIntegrationSettings.CuttingMachineName,
+            Thickness = thickness,
+            RotationAllowance = rotationAllowance,
+            UserInfo03 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
+            Priority = "1"
+        };
+        await _bySoftApi.UpdatePartAsync(partUri, args);
 
         // 4b. Set the cutting technology => We do not check the manufacturability of this
         // We only set it, for customers that save the part in the database
@@ -97,19 +111,80 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 
     }
 
+    private string GetDescription(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        // Example: Order number:'ORD-123' Reference:'REF-456' PartName: 'Bracket' RowNumber:'1'
+        // here we can add a function to use variable substitution defined in app settings to create a custom description
+        // if no variable substitution is defined, we use the default format
+
+        if (_bySoftIntegrationSettings.DefaultDescriptionFieldFormat == null)
+        {
+            return null;
+        }
+
+        if (_bySoftIntegrationSettings.DefaultDescriptionFieldFormat.Equals("[Default]", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"Order number:'{request.OrderNumber}' Reference:'{request.ProjectReference}' PartName: '{request.PartType.Name}' RowNumber:'{request.PartType.RowNumber}'";
+        }
+
+        var description = _bySoftIntegrationSettings.DefaultDescriptionFieldFormat;
+        description = description.Replace("{ProjectId}", request.ProjectId.ToString());
+        description = description.Replace("{PartId}", request.PartType.Id.ToString());
+        description = description.Replace("{OrderNumber}", request.OrderNumber ?? string.Empty);
+        description = description.Replace("{ProjectReference}", request.ProjectReference ?? string.Empty);
+        description = description.Replace("{PartName}", request.PartType.Name);
+        description = description.Replace("{RowNumber}", request.PartType.RowNumber.ToString());
+        return description;
+
+    }
+
+    private string GetSubDirectory(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        // Default sub directory failback to "manufacturability-check"
+        var resultDirectory = _bySoftIntegrationSettings.DefaultApiSubDirectory ?? "manufacturability-check";
+
+        switch (_bySoftIntegrationSettings.ApiSubDirectoryConfig)
+        {
+            case ApiSubDirectory.Default:
+                resultDirectory = _bySoftIntegrationSettings.DefaultApiSubDirectory ?? "manufacturability-check";
+                break;
+            case ApiSubDirectory.None:
+                resultDirectory = string.Empty;
+                break;
+            case ApiSubDirectory.BuyingPartyName:
+                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName);
+                break;
+            case ApiSubDirectory.BuyingPartyOrderNumber:
+                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.OrderNumber);
+                break;
+            case ApiSubDirectory.BuyingPartyReference:
+                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.ProjectReference);
+                break;
+            case ApiSubDirectory.BuyingPartyProjectId:
+                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.ProjectId.ToString());
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        resultDirectory = Path.GetInvalidPathChars().Aggregate(resultDirectory, (current, invalidChar) => current.Replace(invalidChar, '_'));
+
+        return resultDirectory;
+    }
+
     public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckBendingAsync(
-        RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName)
+        RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
     {
         CheckApiSettings();
 
-        const string subDirectory = "manufacturability-check";
-        var partName = Path.GetFileNameWithoutExtension(stepFilePathName);
+        var partName = Path.GetFileNameWithoutExtension(geometryFilePathName);
+        var subDirectory = GetSubDirectory(request);
 
         // 0. Delete part if it already exists
         await DeleteExistingPartAsync(partName, subDirectory);
 
         // 1. Create part from file
-        await _bySoftApi.ImportPartAsync(stepFilePathName, subDirectory);
+        await _bySoftApi.ImportPartAsync(geometryFilePathName, subDirectory);
 
         // 2. Get the Uri of the part
         var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
@@ -121,11 +196,23 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // Retrieve from the request object
         var materialName = GetMaterialName(request);
         var bendingMachineName = GetBendingMachineName(request);
-        var cuttingMachineName = _bySoftIntegrationSettings.CuttingMachineName;
         var thickness = GetThickness(request);
         var rotationAllowance = GetRotationAllowance(request.PartType);
         // 3. Update part with material and machine info
-        await _bySoftApi.UpdatePartAsync(partUri, materialName, bendingMachineName, cuttingMachineName, thickness, rotationAllowance);
+        var args = new UpdatePartArgs()
+        {
+            Description = GetDescription(request),
+            MaterialName = materialName,
+            BendingMachineName = bendingMachineName,
+            CuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
+                ? GetCuttingMachineName(request)
+                : _bySoftIntegrationSettings.CuttingMachineName,
+            Thickness = thickness,
+            RotationAllowance = rotationAllowance,
+            UserInfo03 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
+            Priority = "1"
+        };
+        await _bySoftApi.UpdatePartAsync(partUri, args);
 
         // 4. Add Bending technology => This is also the *initial* check of manufacturability
         await _bySoftApi.SetBendingTechnologyAsync(partUri);
@@ -188,7 +275,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
         if (!string.IsNullOrWhiteSpace(partUri))
         {
-            _logger.LogDebug("Part exists. Delete it.");
+            _logger.LogDebug("Part exists. Delete it");
             await _bySoftApi.DeletePartAsync(partUri);
         }
     }
@@ -241,7 +328,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
         else
         {
-            var materialId = request.PartType.Material.SelectableArticles.SelectedArticle.Id;
+            var materialId = request.PartType.Material.SelectableArticles.SelectedArticle?.Id;
             var integrationMaterialId = _materialMappingRepository.GetMaterialCodeFromArticle(materialId);
             if (string.IsNullOrWhiteSpace(integrationMaterialId))
             {
@@ -259,20 +346,11 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // Per request/part there is only one bending machine
         // But there can be multiple machines defined in quotation factory and the intergration.
         // We need to find the machine used in quotation factory, then find the corresponding machine id of the integration
-        string resourceId = null;
-        foreach (var estimation in request.PartType.Estimations)
-        {
-            foreach (var stepEstimation in estimation.WorkingStepEstimations)
-            {
-                if (
-                    stepEstimation.ResourceWorkingStepKey.WorkingStepKey.PrimaryWorkingStep == WorkingStepTypeV1.SheetBending &&
-                    stepEstimation.ResourceWorkingStepKey.WorkingStepKey.SecondaryWorkingStep == WorkingStepTypeV1.SheetBending
-                )
-                {
-                    resourceId = stepEstimation.ResourceWorkingStepKey.ResourceId.ToString();
-                }
-            }
-        }
+        var sheetCuttingWorkingStep = request.PartType.Estimations
+            .SelectMany(x => x.WorkingStepEstimations
+                .Where(est => est.ResourceWorkingStepKey.WorkingStepKey is { PrimaryWorkingStep: WorkingStepTypeV1.SheetBending, SecondaryWorkingStep: WorkingStepTypeV1.SheetBending }))
+            .FirstOrDefault();
+        var resourceId = sheetCuttingWorkingStep?.ResourceWorkingStepKey.ResourceId.ToString();
 
         if (string.IsNullOrWhiteSpace(resourceId))
         {
@@ -281,21 +359,50 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                 $"No bending machine found in request of project-id: {request.ProjectId}, part-id: {request.PartType.Id}");
         }
 
-        var machineId = _machineMappingRepository.GetBySoftMachineId(resourceId);
+        var bendingMachineName = _machineMappingRepository.GetBySoftMachineId(resourceId);
 
-        if (string.IsNullOrWhiteSpace(machineId))
+        if (string.IsNullOrWhiteSpace(bendingMachineName))
         {
             throw new ApplicationException(
                 $"Machine could not be found in data/MachineMapping.xlsx. for machine-id: {resourceId}.");
         }
 
-        return machineId;
+        return bendingMachineName;
+    }
+
+    private string GetCuttingMachineName(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        // Per request/part there is only one bending machine
+        // But there can be multiple machines defined in quotation factory and the integration.
+        // We need to find the machine used in quotation factory, then find the corresponding machine id of the integration
+        var sheetCuttingWorkingStep = request.PartType.Estimations
+            .SelectMany(x => x.WorkingStepEstimations
+                .Where(est => est.ResourceWorkingStepKey.WorkingStepKey is { PrimaryWorkingStep: WorkingStepTypeV1.SheetCutting, SecondaryWorkingStep: WorkingStepTypeV1.SheetCutting }))
+            .FirstOrDefault();
+        var resourceId = sheetCuttingWorkingStep?.ResourceWorkingStepKey.ResourceId.ToString();
+
+        if (string.IsNullOrWhiteSpace(resourceId))
+        {
+            // no machine found for bending, throw error without machines and log error
+            throw new ApplicationException(
+                $"No sheetCutting machine found in request of project-id: {request.ProjectId}, part-id: {request.PartType.Id}");
+        }
+
+        var cuttingMachineName = _machineMappingRepository.GetBySoftMachineId(resourceId);
+
+        if (string.IsNullOrWhiteSpace(cuttingMachineName))
+        {
+            throw new ApplicationException(
+                $"Machine could not be found in data/MachineMapping.xlsx. for machine-id: {resourceId}.");
+        }
+
+        return cuttingMachineName;
     }
 
     private double GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
         double thickness = 0;
-        if (request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness.HasValue)
+        if (request.PartType.Material.SelectableArticles.SelectedArticle is { Dimensions.Thickness: not null })
         {
             // Thickness should be provided in the units of the machine.
             // Get the unit of measurement from the app.settings
@@ -329,32 +436,30 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // If response is Ok WarningFound or it is manufacturable, else not.
         var isManufacturable = !string.Equals(checkPartResult.State, "ErrorFound", StringComparison.OrdinalIgnoreCase);
 
-        if (_bySoftIntegrationSettings.WarningsAsErrors.Any())
+        if (_bySoftIntegrationSettings.WarningsAsErrors.Length != 0)
         {
-            var warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            if (checkPartResult.BendingDetails?.Any(x => warningsAsErrors.Contains(x.Description)) ?? false)
+            if (checkPartResult.BendingDetails?.Any(x => _warningsAsErrors.Contains(x.Description)) ?? false)
             {
                 isManufacturable = false;
             }
 
-            if (checkPartResult.CuttingDetails?.Any(x => warningsAsErrors.Contains(x.Description)) ?? false)
+            if (checkPartResult.CuttingDetails?.Any(x => _warningsAsErrors.Contains(x.Description)) ?? false)
             {
                 isManufacturable = false;
             }
 
-            if (checkPartResult.GeometryDetails?.Any(x => warningsAsErrors.Contains(x.Description)) ?? false)
+            if (checkPartResult.GeometryDetails?.Any(x => _warningsAsErrors.Contains(x.Description)) ?? false)
             {
                 isManufacturable = false;
             }
         }
-
 
         return new RequestManufacturabilityCheckOfPartTypeMessageResponse
         {
             ProjectId = request.ProjectId,
             PartTypeId = request.PartType.Id,
             IsManufacturable = isManufacturable,
-            EventLogs = BuildEventLog(request, checkPartResult)
+            EventLogs = BuildEventLog(request, checkPartResult, _warningsAsErrors)
         };
     }
 
@@ -373,7 +478,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         };
     }
 
-    private static List<EventLog> BuildEventLog(RequestManufacturabilityCheckOfPartTypeMessage request, CheckPartResponse checkPartResult)
+    private static List<EventLog> BuildEventLog(RequestManufacturabilityCheckOfPartTypeMessage request, CheckPartResponse checkPartResult,string[] warningsAsErrors)
     {
         var logs = new List<EventLog>();
 
@@ -383,7 +488,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             {
                 DateTime = DateTime.UtcNow,
                 Message = $"{bendingDetail.Description}. Status: {bendingDetail.State}",
-                Level = GetLogLevel(bendingDetail.State),
+                Level =  warningsAsErrors.Contains(bendingDetail.Description, StringComparer.OrdinalIgnoreCase) ? EventLogLevel.Error : GetLogLevel(bendingDetail.State),
                 ProjectId = request.ProjectId,
                 PartTypeId = request.PartType.Id
             }));
@@ -395,7 +500,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             {
                 DateTime = DateTime.UtcNow,
                 Message = $"{cuttingDetail.Description}. Status: {cuttingDetail.State}",
-                Level = GetLogLevel(cuttingDetail.State),
+                Level = warningsAsErrors.Contains(cuttingDetail.Description, StringComparer.OrdinalIgnoreCase) ? EventLogLevel.Error : GetLogLevel(cuttingDetail.State),
                 ProjectId = request.ProjectId,
                 PartTypeId = request.PartType.Id
             }));
@@ -407,7 +512,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             {
                 DateTime = DateTime.UtcNow,
                 Message = $"{geometryDetail.Description}. Status: {geometryDetail.State}",
-                Level = GetLogLevel(geometryDetail.State),
+                Level = warningsAsErrors.Contains(geometryDetail.Description, StringComparer.OrdinalIgnoreCase) ? EventLogLevel.Error : GetLogLevel(geometryDetail.State),
                 ProjectId = request.ProjectId,
                 PartTypeId = request.PartType.Id
             }));

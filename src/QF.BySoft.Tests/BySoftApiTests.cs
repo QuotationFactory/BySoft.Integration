@@ -24,7 +24,7 @@ public class BySoftApiTests
 {
     private const string StepFilePathName = "C:\\temp\\step.step";
 
-    private const string SubDirectory = "manufacturability-check";
+    private const string DefaultSubDirectory = "manufacturability-check";
 
     // BySoft API variables for Mock
     private readonly string _apiBasePath;
@@ -42,7 +42,7 @@ public class BySoftApiTests
             $"{_bySoftIntegrationSettings.BySoftApiServer}:{_bySoftIntegrationSettings.BySoftApiPort}/{_bySoftIntegrationSettings.BySoftApiRootPath}";
         _partNameResult = new List<string>
         {
-            $"box://Parts/API/{SubDirectory}/step",
+            $"box://Parts/API/{DefaultSubDirectory}/step",
             "box://dummy"
         };
         _bendingResponse = new SetTechnologyResponse
@@ -59,7 +59,7 @@ public class BySoftApiTests
         // Arrange
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(_bySoftIntegrationSettings);
-        var httpMessageHandlerMock = HttpMessageHandlerMock(_apiBasePath, StepFilePathName, SubDirectory,
+        var httpMessageHandlerMock = HttpMessageHandlerMock(_apiBasePath, StepFilePathName, DefaultSubDirectory,
             _partNameResult, _bendingResponse, HttpStatusCode.BadRequest);
         var httpClient = httpMessageHandlerMock.CreateClient();
 
@@ -70,7 +70,7 @@ public class BySoftApiTests
         );
 
         // Act
-        var act = () => sut.ImportPartAsync(StepFilePathName, SubDirectory);
+        var act = () => sut.ImportPartAsync(StepFilePathName, DefaultSubDirectory);
 
         // Assert
         await act
@@ -85,7 +85,7 @@ public class BySoftApiTests
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(_bySoftIntegrationSettings);
         var httpMessageHandlerMock =
-            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
         // Overwrite the GetPartUrisName part handler, return false the first time, returns true the second call
         // http://localhost:56111/api/v1/Parts/GetPartUris?name=project-x
         var partName = Path.GetFileNameWithoutExtension(_partNameResult.First());
@@ -103,7 +103,7 @@ public class BySoftApiTests
         );
 
         // Act
-        Func<Task> act = () => sut.GetUriFromPartNameAsync(partName, SubDirectory);
+        Func<Task> act = () => sut.GetUriFromPartNameAsync(partName, DefaultSubDirectory);
 
         // Assert
         await act
@@ -118,7 +118,7 @@ public class BySoftApiTests
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(_bySoftIntegrationSettings);
         var httpMessageHandlerMock =
-            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
         // Overwrite the UpdatePart
         httpMessageHandlerMock
             .SetupRequest(HttpMethod.Post,
@@ -134,7 +134,18 @@ public class BySoftApiTests
         );
 
         // Act
-        var act = () => sut.UpdatePartAsync(_partNameResult.First(), "", "", "", 1, null);
+        var args = new UpdatePartArgs
+        {
+            Description = string.Empty,
+            MaterialName = string.Empty,
+            BendingMachineName = string.Empty,
+            CuttingMachineName = string.Empty,
+            UserInfo03 = string.Empty,
+            Priority = "1",
+            Thickness = 1,
+            RotationAllowance = null
+        };
+        var act = () => sut.UpdatePartAsync(_partNameResult.First(), args);
 
         // Assert
         await act
@@ -148,7 +159,7 @@ public class BySoftApiTests
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(_bySoftIntegrationSettings);
         var httpMessageHandlerMock =
-            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+            HttpMessageHandlerMock(_apiBasePath, StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
         // Overwrite the Delete part
         httpMessageHandlerMock
             .SetupRequest(HttpMethod.Post,

@@ -77,8 +77,7 @@ public class BySoftApi : IBySoftApi
         return uri;
     }
 
-    public async Task UpdatePartAsync(string partUri, string materialName, string bendingMachineName, string cuttingMachineName,
-        double thickness, int? rotationAllowance)
+    public async Task UpdatePartAsync(string partUri, UpdatePartArgs args)
     {
         // Example call
         // http://localhost:56111/api/v1/Parts/Update?uri=box%3A%2F%2FParts%2FAPI%2Fmh-test%2Fproject-x%2398a5641f-efa2-44b1-a51f-11dbbdb440d8
@@ -94,26 +93,8 @@ public class BySoftApi : IBySoftApi
 
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
-        var content = new UpdatePartInfo
-        {
-            MaterialName = materialName,
-            Thickness = thickness,
-            Priority = "1",
-            RotationAllowance = rotationAllowance
-        };
-
-        if (!string.IsNullOrWhiteSpace(bendingMachineName))
-        {
-            content.BendingMachineName = bendingMachineName;
-        }
-
-        if (!string.IsNullOrWhiteSpace(cuttingMachineName))
-        {
-            content.CuttingMachineName = cuttingMachineName;
-        }
-
-        _logger.LogDebug("UpdatePartAsync. with materialName: '{materialName}', bendingMachineName:'{bendingMachineName}', cuttingMachineName: '{cuttingMachineName}' Url: {Url}", materialName, bendingMachineName, cuttingMachineName, url);
-        var response = await _httpClient.PostAsJsonAsync(url, content);
+        _logger.LogDebug("UpdatePartAsync. {Args}  Url: {Url}", args, url);
+        var response = await _httpClient.PostAsJsonAsync(url, args);
         // Throws an error in not successful
         response.EnsureSuccessStatusCode();
     }

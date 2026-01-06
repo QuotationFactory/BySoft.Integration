@@ -12,7 +12,7 @@ public interface IBySoftManufacturabilityCheck
     ///     Creates the BySoft LOP file and returns the file contents as string
     /// </summary>
     /// <returns></returns>
-    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName);
-    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckBendingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string stepFilePathName);
+    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName);
+    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckBendingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName);
 
 }

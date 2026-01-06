@@ -81,4 +81,22 @@ public class BySoftIntegrationSettings
     public string [] KeywordsForPartWithSurfaceTreatment { get; set; } =
     ["laser foil", "double foil", "mirror 8", "5wl", "6wl", "cd-overlay", "circle polished", "centerless grinded", "steel look",
         "varnished", "leather structure", "stucco design", "rice grain structure", "centerless grinded", "one-sided grinding", "double-sided grinding"];
+    /// <summary>
+    ///    Default sub directory in BySoft where the parts will be imported to
+    /// </summary>
+    public string DefaultApiSubDirectory { get; set; }
+    public  ApiSubDirectory ApiSubDirectoryConfig { get; set; }
+    /// <summary>
+    ///    Format for the description field in BySoft.
+    ///    If set to [Default], a default format will be used, like:
+    ///    Order number:'ORD-123' Reference:'REF-456' PartName: 'Bracket' RowNumber:'1'
+    ///    Possible placeholders:
+    ///    {ProjectId} - the project id
+    ///    {PartId} - the part type id
+    ///    {OrderNumber} - the order number
+    ///    {ProjectReference} - the project reference
+    ///    {PartName} - the part type name
+    ///    {RowNumber} - the part type row number
+    /// </summary>
+    public string DefaultDescriptionFieldFormat { get; set; }
 }
