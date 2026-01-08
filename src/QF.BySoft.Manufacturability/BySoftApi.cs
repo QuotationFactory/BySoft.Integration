@@ -30,7 +30,7 @@ public class BySoftApi : IBySoftApi
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
     }
 
-    public async Task ImportPartAsync(string path, string subDirectory, bool secondTry = false)
+    public async Task ImportPartAsync(string path, string subDirectory)
     {
         //Example: http://localhost:56111/api/v1/Parts/ImportPart?path=c%3A%5Ctemp%5Cproject-x.step&subdirectory=mh-test
         var requestUri = $"{GetApiBasePath()}/Parts/ImportPart?path={path.UrlEncode()}&subdirectory={subDirectory.UrlEncode()}";
