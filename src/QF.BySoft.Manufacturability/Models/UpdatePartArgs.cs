@@ -114,9 +114,9 @@ public class UpdatePartArgs
 {
     // public string Name { get; set; }
     public required string? Description { get; set; }
-    // public string UserInfo01 { get; set; }
-    //public required string UserInfo02 { get; set; }
-    public required string UserInfo03 { get; set; }
+    // public string UserInfo1 { get; set; }
+    //public required string UserInfo2 { get; set; }
+    public required string UserInfo3 { get; set; }
     public required string MaterialName { get; set; }
     public required string CuttingMachineName { get; set; }
     public required string BendingMachineName { get; set; }

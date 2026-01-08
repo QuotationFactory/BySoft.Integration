@@ -67,13 +67,25 @@ public class BySoftApi : IBySoftApi
 
         var responseContent = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
         // There could be more than one part with the same name. But the sub directory is part
+        // we should take the urlEncoding into account, because special characters could be part
         // of the URI, so we filter on the sub directory.
-        var uri = responseContent.FirstOrDefault(r => r.Contains(subDirectory));
-        // if (uri == null)
-        // {
-        //     throw new ApplicationException($"Part name could not be retrieved. Part name: {partName}");
-        // }
 
+        _logger.LogDebug("SubDirectory: {SubDirectory}", subDirectory);
+        _logger.LogDebug("GetPartUris response: {Response}", responseContent);
+
+        var decodedSubDirectory = subDirectory.UrlDecode();
+        var uri = responseContent.FirstOrDefault(boxUri =>
+        {
+            // the box uri contains a directory with a / and the subdirectory is a \ defined by Path.Combine.
+            // So we need to decode both and compare
+            var uri = boxUri.UrlDecode();
+            _logger.LogDebug("boxUri Decoded: {Uri}", uri);
+            // Normalize directory separators in the URI as well
+            // because the decoded subdirectory is defined with a \
+            // the boxfile location uses /
+            var normalizedUri = uri.Replace('/', '\\');
+            return normalizedUri.Contains(decodedSubDirectory, StringComparison.OrdinalIgnoreCase);
+        });
         return uri;
     }
 

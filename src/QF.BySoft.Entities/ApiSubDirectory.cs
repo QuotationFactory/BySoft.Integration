@@ -8,4 +8,5 @@ public enum ApiSubDirectory
     BuyingPartyOrderNumber = 3,
     BuyingPartyReference = 4,
     BuyingPartyProjectId = 5,
+    BuyingCodeProjectId = 6
 }

@@ -14,4 +14,9 @@ public static class StringExtention
     {
         return HttpUtility.UrlEncode(stringIn);
     }
+
+    public static string UrlDecode(this string stringIn)
+    {
+        return HttpUtility.UrlDecode(stringIn);
+    }
 }

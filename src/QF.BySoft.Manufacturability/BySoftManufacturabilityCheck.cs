@@ -82,7 +82,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             : _bySoftIntegrationSettings.CuttingMachineName,
             Thickness = thickness,
             RotationAllowance = rotationAllowance,
-            UserInfo03 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
+            UserInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
             Priority = "1"
         };
         await _bySoftApi.UpdatePartAsync(partUri, args);
@@ -142,6 +142,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     {
         // Default sub directory failback to "manufacturability-check"
         var resultDirectory = _bySoftIntegrationSettings.DefaultApiSubDirectory ?? "manufacturability-check";
+        var buyingPartyNameSanitized = request.BuyingPartyName.Replace(".", "");
+        var orderNumberSanitized = request.OrderNumber?.Replace(".", "") ?? string.Empty;
+        var projectReferenceSanitized = request.ProjectReference?.Replace(".", "") ?? string.Empty;
 
         switch (_bySoftIntegrationSettings.ApiSubDirectoryConfig)
         {
@@ -152,16 +155,20 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                 resultDirectory = string.Empty;
                 break;
             case ApiSubDirectory.BuyingPartyName:
-                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName);
+                resultDirectory = Path.Combine(resultDirectory, buyingPartyNameSanitized);
                 break;
             case ApiSubDirectory.BuyingPartyOrderNumber:
-                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.OrderNumber);
+                resultDirectory = Path.Combine(resultDirectory, buyingPartyNameSanitized, orderNumberSanitized);
                 break;
             case ApiSubDirectory.BuyingPartyReference:
-                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.ProjectReference);
+                resultDirectory = Path.Combine(resultDirectory, buyingPartyNameSanitized, projectReferenceSanitized);
                 break;
             case ApiSubDirectory.BuyingPartyProjectId:
-                resultDirectory = Path.Combine(resultDirectory, request.BuyingPartyName, request.ProjectId.ToString());
+                resultDirectory = Path.Combine(resultDirectory, buyingPartyNameSanitized, request.ProjectId.ToString());
+                break;
+            case ApiSubDirectory.BuyingCodeProjectId:
+                var code = string.IsNullOrWhiteSpace(request.BuyingPartyCode) ? buyingPartyNameSanitized : request.BuyingPartyCode;
+                resultDirectory = Path.Combine(resultDirectory, code, request.ProjectId.ToString());
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -209,7 +216,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                 : _bySoftIntegrationSettings.CuttingMachineName,
             Thickness = thickness,
             RotationAllowance = rotationAllowance,
-            UserInfo03 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
+            UserInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
             Priority = "1"
         };
         await _bySoftApi.UpdatePartAsync(partUri, args);

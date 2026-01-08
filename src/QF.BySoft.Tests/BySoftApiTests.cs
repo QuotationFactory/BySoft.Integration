@@ -140,7 +140,7 @@ public class BySoftApiTests
             MaterialName = string.Empty,
             BendingMachineName = string.Empty,
             CuttingMachineName = string.Empty,
-            UserInfo03 = string.Empty,
+            UserInfo3 = string.Empty,
             Priority = "1",
             Thickness = 1,
             RotationAllowance = null
