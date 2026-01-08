@@ -102,7 +102,6 @@ public class BySoftApi : IBySoftApi
         //     "rotationAllowance": 1/5/10/30/45/90/180
         // }
 
-
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
         _logger.LogDebug("UpdatePartAsync. {Args}  Url: {Url}", args, url);

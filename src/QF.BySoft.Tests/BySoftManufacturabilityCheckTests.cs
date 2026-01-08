@@ -78,7 +78,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         result.ProjectId.Should().Be(_projectIdValue);
@@ -112,7 +112,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -154,7 +154,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -187,7 +187,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -220,7 +220,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -253,7 +253,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -292,7 +292,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         result.EventLogs.Should().HaveCount(1);
@@ -330,7 +330,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         bySoftApiMock.Invocations.Should().NotContain(a => a.Method.Name == nameof(IBySoftApi.DeletePartAsync));

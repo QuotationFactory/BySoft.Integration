@@ -47,10 +47,8 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckCuttingAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
     {
-        CheckApiSettings();
-
         var partName = Path.GetFileNameWithoutExtension(geometryFilePathName);
         var subDirectory = GetSubDirectory(request);
 
@@ -68,24 +66,37 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         // Retrieve from the request object
+        var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
         var materialName = GetMaterialName(request);
+        var bendingMachineName = containsBending ? GetBendingMachineName(request): string.Empty;
         var thickness = GetThickness(request);
         var rotationAllowance = GetRotationAllowance(request.PartType);
+        var description = GetDescription(request);
+        var cuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
+            ? GetCuttingMachineName(request)
+            : _bySoftIntegrationSettings.CuttingMachineName;
+        var userInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'";
+        const string priority = "1";
+
         // 3. Update part with material and machine info
         var args = new UpdatePartArgs()
         {
-            Description = GetDescription(request),
+            Description = description,
             MaterialName = materialName,
-            BendingMachineName = string.Empty,// No bending machine for cutting only
-            CuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
-            ? GetCuttingMachineName(request)
-            : _bySoftIntegrationSettings.CuttingMachineName,
+            BendingMachineName = bendingMachineName,
+            CuttingMachineName = cuttingMachineName,
             Thickness = thickness,
             RotationAllowance = rotationAllowance,
-            UserInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
-            Priority = "1"
+            UserInfo3 = userInfo3,
+            Priority = priority
         };
         await _bySoftApi.UpdatePartAsync(partUri, args);
+
+        // 4. Add Bending technology => This is also the *initial* check of manufacturability
+        if (containsBending)
+        {
+            await _bySoftApi.SetBendingTechnologyAsync(partUri);
+        }
 
         // 4b. Set the cutting technology => We do not check the manufacturability of this
         // We only set it, for customers that save the part in the database
@@ -97,7 +108,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // 4c. Check part for manufacturability states
         var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
 
-
         // 5. Delete part
         if (!_bySoftIntegrationSettings.SavePartInBySoft)
         {
@@ -108,7 +118,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         var response = CreateResponse(request, checkPartResult);
 
         return response;
-
     }
 
     private string GetDescription(RequestManufacturabilityCheckOfPartTypeMessage request)
@@ -141,6 +150,10 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     private string GetSubDirectory(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
         // Default sub directory failback to "manufacturability-check"
+        // we build the sub directory based on the configuration
+        // be careful with invalid path characters in the sub directory parts
+        // BySoftApi fails or has a bug when a '.' is in the path at the end of a folder name
+        // so we remove those from the buying party name, order number and project reference
         var resultDirectory = _bySoftIntegrationSettings.DefaultApiSubDirectory ?? "manufacturability-check";
         var buyingPartyNameSanitized = request.BuyingPartyName.Replace(".", "");
         var orderNumberSanitized = request.OrderNumber?.Replace(".", "") ?? string.Empty;
@@ -177,73 +190,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         resultDirectory = Path.GetInvalidPathChars().Aggregate(resultDirectory, (current, invalidChar) => current.Replace(invalidChar, '_'));
 
         return resultDirectory;
-    }
-
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckBendingAsync(
-        RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
-    {
-        CheckApiSettings();
-
-        var partName = Path.GetFileNameWithoutExtension(geometryFilePathName);
-        var subDirectory = GetSubDirectory(request);
-
-        // 0. Delete part if it already exists
-        await DeleteExistingPartAsync(partName, subDirectory);
-
-        // 1. Create part from file
-        await _bySoftApi.ImportPartAsync(geometryFilePathName, subDirectory);
-
-        // 2. Get the Uri of the part
-        var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
-        if (string.IsNullOrWhiteSpace(partUri))
-        {
-            throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
-        }
-
-        // Retrieve from the request object
-        var materialName = GetMaterialName(request);
-        var bendingMachineName = GetBendingMachineName(request);
-        var thickness = GetThickness(request);
-        var rotationAllowance = GetRotationAllowance(request.PartType);
-        // 3. Update part with material and machine info
-        var args = new UpdatePartArgs()
-        {
-            Description = GetDescription(request),
-            MaterialName = materialName,
-            BendingMachineName = bendingMachineName,
-            CuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
-                ? GetCuttingMachineName(request)
-                : _bySoftIntegrationSettings.CuttingMachineName,
-            Thickness = thickness,
-            RotationAllowance = rotationAllowance,
-            UserInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'",
-            Priority = "1"
-        };
-        await _bySoftApi.UpdatePartAsync(partUri, args);
-
-        // 4. Add Bending technology => This is also the *initial* check of manufacturability
-        await _bySoftApi.SetBendingTechnologyAsync(partUri);
-
-        // 4b. Set the cutting technology => We do not check the manufacturability of this
-        // We only set it, for customers that save the part in the database
-        if (_bySoftIntegrationSettings.SetCuttingTechnology)
-        {
-            await _bySoftApi.SetCuttingTechnologyAsync(partUri);
-        }
-
-        // 4c. Check part for manufacturability states
-        var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
-
-        // 5. Delete part
-        if (!_bySoftIntegrationSettings.SavePartInBySoft)
-        {
-            await _bySoftApi.DeletePartAsync(partUri);
-        }
-
-        // 6. Create response
-        var response = CreateResponse(request, checkPartResult);
-
-        return response;
     }
 
     private int? GetRotationAllowance(PartTypeV1 partType)
@@ -284,26 +230,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         {
             _logger.LogDebug("Part exists. Delete it");
             await _bySoftApi.DeletePartAsync(partUri);
-        }
-    }
-
-    private void CheckApiSettings()
-    {
-        _logger.LogDebug("CheckApiSettings");
-
-        if (string.IsNullOrWhiteSpace(_bySoftIntegrationSettings.BySoftApiServer))
-        {
-            throw new ApplicationException("No BySoft API server provided in the app.settings");
-        }
-
-        if (string.IsNullOrWhiteSpace(_bySoftIntegrationSettings.BySoftApiPort))
-        {
-            throw new ApplicationException("No BySoft API port provided in the app.settings");
-        }
-
-        if (string.IsNullOrWhiteSpace(_bySoftIntegrationSettings.BySoftApiRootPath))
-        {
-            throw new ApplicationException("No BySoft API Root Path provided in the app.settings");
         }
     }
 
@@ -353,6 +279,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // Per request/part there is only one bending machine
         // But there can be multiple machines defined in quotation factory and the intergration.
         // We need to find the machine used in quotation factory, then find the corresponding machine id of the integration
+
         var sheetCuttingWorkingStep = request.PartType.Estimations
             .SelectMany(x => x.WorkingStepEstimations
                 .Where(est => est.ResourceWorkingStepKey.WorkingStepKey is { PrimaryWorkingStep: WorkingStepTypeV1.SheetBending, SecondaryWorkingStep: WorkingStepTypeV1.SheetBending }))

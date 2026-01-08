@@ -106,11 +106,7 @@ public class BySoftIntegration : IBySoftIntegration
             await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, inputFileNamePath);
             _logger.LogInformation("Downloaded step file: {StepFilePathName}", inputFileNamePath);
 
-            // Do manufacturability check with BySoft CAM API
-            var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
-            var result = containsBending
-                ? await _bySoftApi.ManufacturabilityCheckBendingAsync(request, inputFileNamePath)
-                : await _bySoftApi.ManufacturabilityCheckCuttingAsync(request, inputFileNamePath);
+            var result = await _bySoftApi.ManufacturabilityCheckAsync(request, inputFileNamePath);
 
             if (result != null)
             {
