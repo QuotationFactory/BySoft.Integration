@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using QF.BySoft.Integration.Features.AgentOutputFile;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.Integration.Common.Serialization;
 using Versioned.ExternalDataContracts;
-using Versioned.ExternalDataContracts.Enums;
 using Constants = QF.BySoft.Entities.Constants;
 
 namespace QF.BySoft.Integration.Features.BySoftIntegration;
@@ -62,7 +60,6 @@ public class BySoftIntegration : IBySoftIntegration
                 throw new ArgumentNullException(nameof(jsonFilePath));
             }
 
-
             // check if json file exists, handle the request
             if (!File.Exists(jsonFilePath))
             {
@@ -86,27 +83,14 @@ public class BySoftIntegration : IBySoftIntegration
             }
 
             var geometryDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.IntegrationName);
-            // The name of the step-file depends on the app setting SavePartWithCombinedFileName
-            // If false: Step file name will have the same name as the part-id , with the extension .step
-            // If true : Step file name will be partId_partName , with the extension .step
-            var originalFileNameExtension = Path.GetExtension(request.PartType.OriginalFileName);
-            var originalFileName = request.PartType.AssemblyId == Constants.AssemblyIdRepresentingIndividualParts
-                ? request.PartType.OriginalFileName
-                : $"{request.PartType.Name}{originalFileNameExtension}";
-            var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
-            // Replace invalid file name characters
-            originalFileNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+            var geometryFilePathName = Path.Combine(geometryDownloadDirectory, Path.GetRandomFileName());
 
-            var inputFileName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
-                ? $"{request.PartType.Id.ToString()}_{originalFileNameWithoutExtension}{originalFileNameExtension}"
-                : $"{request.PartType.Id.ToString()}{originalFileNameExtension}";
-            var inputFileNamePath = Path.Combine(geometryDownloadDirectory, inputFileName);
+            // Download the Geometry file from the provided URI
+            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, geometryFilePathName);
+            _logger.LogInformation("Downloaded step file: {StepFilePathName}", geometryFilePathName);
 
-            // Download the step file sync
-            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, inputFileNamePath);
-            _logger.LogInformation("Downloaded step file: {StepFilePathName}", inputFileNamePath);
-
-            var result = await _bySoftApi.ManufacturabilityCheckAsync(request, inputFileNamePath);
+            // Call BySoft API to do manufacturability check
+            var result = await _bySoftApi.ManufacturabilityCheckAsync(request, geometryFilePathName);
 
             if (result != null)
             {
@@ -144,8 +128,11 @@ public class BySoftIntegration : IBySoftIntegration
         {
             _logger.LogError(ex, "Error processing file: {JsonFilePath}", jsonFilePath);
             // Do not move the file, but copy, see remark above
-            _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
-            ReportException(ex, request);
+            if (jsonFilePath != null)
+            {
+                _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
+                ReportException(ex, request);
+            }
         }
     }
 

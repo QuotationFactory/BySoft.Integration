@@ -73,7 +73,12 @@ public class BySoftApi : IBySoftApi
         _logger.LogDebug("SubDirectory: {SubDirectory}", subDirectory);
         _logger.LogDebug("GetPartUris response: {Response}", responseContent);
 
-        var decodedSubDirectory = subDirectory.UrlDecode();
+        if (responseContent is null)
+        {
+            throw new ApplicationException("BySoft getPartUris failed: response content is null");
+        }
+
+        var decodedSubDirectory = subDirectory.UrlDecode() ?? string.Empty;
         var uri = responseContent.FirstOrDefault(boxUri =>
         {
             // the box uri contains a directory with a / and the subdirectory is a \ defined by Path.Combine.
@@ -83,7 +88,11 @@ public class BySoftApi : IBySoftApi
             // Normalize directory separators in the URI as well
             // because the decoded subdirectory is defined with a \
             // the boxfile location uses /
-            var normalizedUri = uri.Replace('/', '\\');
+            var normalizedUri = uri?.Replace('/', '\\');
+            if (normalizedUri == null)
+            {
+                return false;
+            }
             return normalizedUri.Contains(decodedSubDirectory, StringComparison.OrdinalIgnoreCase);
         });
         return uri;
@@ -104,10 +113,14 @@ public class BySoftApi : IBySoftApi
 
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
-        _logger.LogDebug("UpdatePartAsync. {Args}  Url: {Url}", args, url);
+        _logger.LogDebug("UpdatePartAsync. {@Args}  Url: {Url}", args, url);
         var response = await _httpClient.PostAsJsonAsync(url, args);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft updatePart failed: {responseContentFailed}");
+        }
     }
 
     public async Task<SetTechnologyResponse> SetBendingTechnologyAsync(string partUri)
@@ -131,13 +144,14 @@ public class BySoftApi : IBySoftApi
 
         var response = await _httpClient.PostAsync(requestUri, null);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
-
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft setBendingTechnology failed: {responseContentFailed}");
+        }
         var responseContent = await response.Content.ReadFromJsonAsync<SetTechnologyResponse>();
-        var responseForLog = JsonSerializer.Serialize(responseContent);
-        _logger.LogDebug("SetBendingTechnology response: {Log}", responseForLog);
-
-        return responseContent;
+        _logger.LogDebug("SetBendingTechnology response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException($"BySoft setBendingTechnology failed: {responseContent}");
     }
 
     public async Task SetCuttingTechnologyAsync(string partUri)
@@ -154,8 +168,12 @@ public class BySoftApi : IBySoftApi
         var response = await _httpClient.PostAsJsonAsync(requestUri, content);
 
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
-        // We do not check the response. We only set it.
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft setCuttingTechnology failed: {responseContentFailed}");
+        }
     }
 
     public async Task DeletePartAsync(string partUri)
@@ -168,7 +186,11 @@ public class BySoftApi : IBySoftApi
 
         var response = await _httpClient.PostAsync(requestUri, null);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft deletePart failed: {responseContentFailed}");
+        }
     }
 
     public async Task<CheckPartResponse> CheckPartAsync(string partUri)
@@ -178,13 +200,16 @@ public class BySoftApi : IBySoftApi
 
         var response = await _httpClient.GetAsync(requestUri);
         // Throws an error if not successful
-        response.EnsureSuccessStatusCode();
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft checkPart failed: {responseContentFailed}");
+        }
 
         var responseContent = await response.Content.ReadFromJsonAsync<CheckPartResponse>();
-        var responseForLog = JsonSerializer.Serialize(responseContent);
-        _logger.LogDebug("CheckPart response: {Log}", responseForLog);
-
-        return responseContent;
+        _logger.LogDebug("CheckPart response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException("BySoft checkPart failed: response content is null");
     }
 
     /// <summary>

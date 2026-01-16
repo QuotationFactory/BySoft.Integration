@@ -8,5 +8,5 @@ namespace QF.BySoft.Manufacturability.Interfaces;
 /// </summary>
 public interface IBySoftManufacturabilityCheck
 {
-    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName);
+    Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath);
 }

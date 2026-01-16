@@ -47,39 +47,71 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryFilePathName)
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
     {
-        var partName = Path.GetFileNameWithoutExtension(geometryFilePathName);
+        // 0. Rename geometry file based on settings
+        var geometryFilePath = MoveAndRenameGeometryFile(geometryDownloadFilePath, request);
+        var partName = Path.GetFileNameWithoutExtension(geometryFilePath);
         var subDirectory = GetSubDirectory(request);
 
-        // 0. Delete part if it already exists
+        // 1. Delete part if it already exists, only when we do not save parts in BySoft
         await DeleteExistingPartAsync(partName, subDirectory);
 
-        // 1. Create part from file
-        await _bySoftApi.ImportPartAsync(geometryFilePathName, subDirectory);
+        // 2. Create part from file
+        await _bySoftApi.ImportPartAsync(geometryFilePath, subDirectory);
 
-        // 2. Get the Uri of the part
+        // 3. Get the Uri of the part
         var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
         if (string.IsNullOrWhiteSpace(partUri))
         {
             throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
         }
 
+        // 4. Update part with material and machine info
+        var args = CreateUpdatePartArgs(request);
+        await _bySoftApi.UpdatePartAsync(partUri, args);
+
+        // 5. Add Bending technology => This is also the *initial* check of manufacturability
+        if (HasBendingActivity(request))
+        {
+            await _bySoftApi.SetBendingTechnologyAsync(partUri);
+        }
+
+        // 6. Set the cutting technology
+        await _bySoftApi.SetCuttingTechnologyAsync(partUri);
+
+        // 7. Check part for manufacturability states
+        var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
+
+        // 8. Delete part
+        if (!_bySoftIntegrationSettings.SavePartInBySoft)
+        {
+            await _bySoftApi.DeletePartAsync(partUri);
+        }
+
+        // 9. Create response
+        var response = CreateResponse(request, checkPartResult);
+
+        return response;
+    }
+
+    private UpdatePartArgs CreateUpdatePartArgs(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
         // Retrieve from the request object
-        var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
         var materialName = GetMaterialName(request);
-        var bendingMachineName = containsBending ? GetBendingMachineName(request): string.Empty;
+        var bendingMachineName = HasBendingActivity(request) ? GetBendingMachineName(request): string.Empty;
         var thickness = GetThickness(request);
         var rotationAllowance = GetRotationAllowance(request.PartType);
         var description = GetDescription(request);
         var cuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
             ? GetCuttingMachineName(request)
             : _bySoftIntegrationSettings.CuttingMachineName;
-        var userInfo3 = $"ProjectId: '{request.ProjectId}' PartTypeId:'{request.PartType.Id}'";
-        const string priority = "1";
+        var userInfo1 = GetUserInfo1(request);
+        var userInfo2 = GetUserInfo2(request);
+        var userInfo3 = GetUserInfo3(request);
+        const int priority = 1;
 
-        // 3. Update part with material and machine info
-        var args = new UpdatePartArgs()
+       var args = new UpdatePartArgs()
         {
             Description = description,
             MaterialName = materialName,
@@ -87,37 +119,50 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             CuttingMachineName = cuttingMachineName,
             Thickness = thickness,
             RotationAllowance = rotationAllowance,
+            UserInfo1 = userInfo1,
+            UserInfo2 = userInfo2,
             UserInfo3 = userInfo3,
             Priority = priority
         };
-        await _bySoftApi.UpdatePartAsync(partUri, args);
+        return args;
+    }
 
-        // 4. Add Bending technology => This is also the *initial* check of manufacturability
-        if (containsBending)
+    private static bool HasBendingActivity(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        return request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
+    }
+
+    private string MoveAndRenameGeometryFile(string geometryFilePath, RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        var originalFileNameExtension = Path.GetExtension(request.PartType.OriginalFileName);
+        string inputFileName;
+        if (string.IsNullOrWhiteSpace(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat))
         {
-            await _bySoftApi.SetBendingTechnologyAsync(partUri);
+            // The name of the step-file depends on the app setting SavePartWithCombinedFileName
+            // If false: Step file name will have the same name as the part-id , with the extension .step
+            // If true : Step file name will be partId_partName , with the extension .step
+            var originalFileName = request.PartType.AssemblyId == Constants.AssemblyIdRepresentingIndividualParts
+                ? request.PartType.OriginalFileName
+                : $"{request.PartType.Name}{originalFileNameExtension}";
+            var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
+            // Replace invalid file name characters
+            originalFileNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+
+            inputFileName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
+                ? $"{request.PartType.Id.ToString()}_{originalFileNameWithoutExtension}{originalFileNameExtension}"
+                : $"{request.PartType.Id.ToString()}{originalFileNameExtension}";
+        }
+        else
+        {
+            inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension);
         }
 
-        // 4b. Set the cutting technology => We do not check the manufacturability of this
-        // We only set it, for customers that save the part in the database
-        if (_bySoftIntegrationSettings.SetCuttingTechnology)
-        {
-            await _bySoftApi.SetCuttingTechnologyAsync(partUri);
-        }
+        var movedFilePath = Path.GetDirectoryName(geometryFilePath);
+        var destFilePath = Path.Combine(movedFilePath ?? string.Empty, inputFileName);
+        _logger.LogInformation("move geometry file from {GeometryFilePath} to {DestFilePath}", geometryFilePath, destFilePath);
+        File.Move(geometryFilePath, destFilePath, true);
 
-        // 4c. Check part for manufacturability states
-        var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
-
-        // 5. Delete part
-        if (!_bySoftIntegrationSettings.SavePartInBySoft)
-        {
-            await _bySoftApi.DeletePartAsync(partUri);
-        }
-
-        // 6. Create response
-        var response = CreateResponse(request, checkPartResult);
-
-        return response;
+        return destFilePath;
     }
 
     private string GetDescription(RequestManufacturabilityCheckOfPartTypeMessage request)
@@ -137,14 +182,80 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var description = _bySoftIntegrationSettings.DefaultDescriptionFieldFormat;
-        description = description.Replace("{ProjectId}", request.ProjectId.ToString());
-        description = description.Replace("{PartId}", request.PartType.Id.ToString());
-        description = description.Replace("{OrderNumber}", request.OrderNumber ?? string.Empty);
-        description = description.Replace("{ProjectReference}", request.ProjectReference ?? string.Empty);
-        description = description.Replace("{PartName}", request.PartType.Name);
-        description = description.Replace("{RowNumber}", request.PartType.RowNumber.ToString());
+        description = Replacer(description, request);
         return description;
+    }
 
+    private string GetUserInfo1(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        if (_bySoftIntegrationSettings.DefaultInfo1FieldFormat == null)
+        {
+            return null;
+        }
+
+        var info1 = _bySoftIntegrationSettings.DefaultInfo1FieldFormat;
+        info1 = Replacer(info1, request);
+        return info1;
+    }
+
+    private string GetUserInfo2(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        if (_bySoftIntegrationSettings.DefaultInfo2FieldFormat == null)
+        {
+            return null;
+        }
+
+        var info2 = _bySoftIntegrationSettings.DefaultInfo2FieldFormat;
+        info2 = Replacer(info2, request);
+        return info2;
+    }
+
+    private string GetUserInfo3(RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        if (_bySoftIntegrationSettings.DefaultInfo3FieldFormat == null)
+        {
+            return null;
+        }
+
+        var info3 = _bySoftIntegrationSettings.DefaultInfo3FieldFormat;
+        info3 = Replacer(info3, request);
+        return info3;
+    }
+
+    private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request)
+    {
+        input = input.Replace("{BuyingPartyName}", request.BuyingPartyName);
+        input = input.Replace("{BuyingPartyCode}", request.BuyingPartyCode);
+        input = input.Replace("{ProjectId}", request.ProjectId.ToString());
+        input = input.Replace("{PartTypeId}", request.PartType.Id.ToString());
+        input = input.Replace("{OrderNumber}", request.OrderNumber ?? string.Empty);
+        input = input.Replace("{ProjectReference}", request.ProjectReference ?? string.Empty);
+        input = input.Replace("{PartName}", request.PartType.Name);
+        input = input.Replace("{RowNumber}", request.PartType.RowNumber.ToString());
+
+        return input;
+    }
+
+    private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension)
+    {
+        // The name of the step-file depends on the app setting SavePartWithCombinedFileName
+        // If false: Step file name will have the same name as the part-id , with the extension .step
+        // If true : Step file name will be partId_partName , with the extension .step
+        var originalFileNameWithExtension = request.PartType.AssemblyId == Constants.AssemblyIdRepresentingIndividualParts
+            ? request.PartType.OriginalFileName
+            : $"{request.PartType.Name}{originalFileNameExtension}";
+        var originalFileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileNameWithExtension);
+        // Replace invalid file name characters
+        originalFileNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+        originalFileNameWithExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+
+        var resultGeometryName = geometryName.Replace("{originalFileNameWithExtension}", originalFileNameWithExtension);
+        resultGeometryName = resultGeometryName.Replace("{originalFileNameWithoutExtension}", originalFileNameWithoutExtension);
+        resultGeometryName = resultGeometryName.Replace("{originalFileNameExtension}", originalFileNameExtension);
+
+        // here we replace the other variables except
+        geometryName = Replacer(resultGeometryName, request);
+        return geometryName;
     }
 
     private string GetSubDirectory(RequestManufacturabilityCheckOfPartTypeMessage request)
@@ -262,6 +373,13 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         else
         {
             var materialId = request.PartType.Material.SelectableArticles.SelectedArticle?.Id;
+            if (string.IsNullOrWhiteSpace(materialId))
+            {
+                // Material not set, throw error
+                throw new ApplicationException(
+                    "MaterialId is not set");
+            }
+
             var integrationMaterialId = _materialMappingRepository.GetMaterialCodeFromArticle(materialId);
             if (string.IsNullOrWhiteSpace(integrationMaterialId))
             {
@@ -343,10 +461,10 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             switch (_bySoftIntegrationSettings.MachineUnitOfMeasurement)
             {
                 case MachineUnitOfMeasurementInch:
-                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness.Value.Inches;
+                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness?.Inches ?? 0;
                     break;
                 case MachineUnitOfMeasurementMillimeters:
-                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness.Value.Millimeters;
+                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness?.Millimeters ?? 0;
                     break;
                 default:
                     // throw error and do not provide thickness, as we could not determine the units of measurement

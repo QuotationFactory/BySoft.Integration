@@ -14,7 +14,8 @@ public static class SettingsBuilder
             BySoftApiPort = "12345",
             BySoftApiRootPath = "api/v1",
             SavePartInBySoft = false,
-            SavePartWithCombinedFileName = false
+            SavePartWithCombinedFileName = false,
+            RootDirectory = string.Empty
         };
         return bySoftIntegrationSettings;
     }

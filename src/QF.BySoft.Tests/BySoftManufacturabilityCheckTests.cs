@@ -399,7 +399,7 @@ public class BySoftManufacturabilityCheckTests
         // Mock get uri in sequence, because the first time it's called, is to check if it exists.
         // return null to indicate that it does not exists.
         bySoftApiMock
-            .SetupSequence(x => x.GetUriFromPartNameAsync(partName, subDirectory))
+            .SetupSequence(x => x.GetUriFromPartNameAsync(partName, subDirectory))!
             .ReturnsAsync((string)null)
             .ReturnsAsync(partNameResult);
 

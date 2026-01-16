@@ -136,12 +136,14 @@ public class BySoftApiTests
         // Act
         var args = new UpdatePartArgs
         {
-            Description = string.Empty,
+            Description = null,
             MaterialName = string.Empty,
             BendingMachineName = string.Empty,
             CuttingMachineName = string.Empty,
-            UserInfo3 = string.Empty,
-            Priority = "1",
+            UserInfo1 = null,
+            UserInfo2 = null,
+            UserInfo3 = null,
+            Priority = 1,
             Thickness = 1,
             RotationAllowance = null
         };
