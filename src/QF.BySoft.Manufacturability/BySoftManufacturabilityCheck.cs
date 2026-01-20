@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MetalHeaven.Agent.Shared.External.Messages;
 using Microsoft.Extensions.Logging;
@@ -50,46 +51,101 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
     {
         // 0. Rename geometry file based on settings
-        var geometryFilePath = MoveAndRenameGeometryFile(geometryDownloadFilePath, request);
-        var partName = Path.GetFileNameWithoutExtension(geometryFilePath);
         var subDirectory = GetSubDirectory(request);
+        var geometryFilePath = MoveAndRenameGeometryFile(geometryDownloadFilePath, subDirectory, request);
+        var partName = Path.GetFileNameWithoutExtension(geometryFilePath);
 
-        // 1. Delete part if it already exists, only when we do not save parts in BySoft
-        await DeleteExistingPartAsync(partName, subDirectory);
-
-        // 2. Create part from file
-        await _bySoftApi.ImportPartAsync(geometryFilePath, subDirectory);
-
-        // 3. Get the Uri of the part
+        //1. check if part exists and Get the Uri of the part
         var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
+
+        //2. Determine if we need to import geometry
+        // If part does not exist => import
+        // If part exists and AlwaysImportGeometry => delete and import
+        // If part exists and not AlwaysImportGeometry => update only
+        var importGeometryIsNeeded = false;
         if (string.IsNullOrWhiteSpace(partUri))
         {
-            throw new ArgumentException($"Part name could not be retrieved. Part name: {partName}");
+            _logger.LogInformation("Part with name {PartName} does not exist in BySoft system. It will be created", partName);
+            importGeometryIsNeeded = true;
+        }
+        else
+        {
+            if(_bySoftIntegrationSettings.AlwaysImportGeometry)
+            {
+                _logger.LogInformation("Part with name {PartName} already exists in BySoft system. It will be deleted and recreated because AlwaysImportGeometry is set to true", partName);
+                await _bySoftApi.DeletePartAsync(partUri);
+                _logger.LogInformation("Part with name {PartName} has been deleted in BySoft system", partName);
+                importGeometryIsNeeded = true;
+            }
+            else
+            {
+                var partInfo =  await _bySoftApi.GetPartInfoAsync(partUri);
+                var key = partInfo.UserInfo3
+                    .Replace("key:","")
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Split("_");
+                if(key.Length != 2)
+                {
+                    throw  new ApplicationException($"Part with name {partName} already exists in BySoft system but its UserInfo3 field is not valid (value: {partInfo.UserInfo3}). Please rename the part before retrying.");
+                }
+
+                if(Guid.TryParse(key[0], out var projectId) && projectId != Guid.Empty)
+                {
+                    // valid key
+                }
+
+                if (Guid.TryParse(key[1], out var partTypeId) && partTypeId != Guid.Empty)
+                {
+
+                }
+                if (request.ProjectId == projectId && request.PartType.Id == partTypeId)
+                {
+                    // update only
+                }
+                else if(Path.GetFileNameWithoutExtension(geometryFilePath).Equals(partInfo.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ApplicationException($"Part with name {partName} already exists in BySoft system but it belongs to project: {projectId} and PartTypeId: {partTypeId}). Here we have a name conflict. Please rename the part before retrying.");
+                }
+            }
         }
 
-        // 4. Update part with material and machine info
+        // 3. Create part from file if needed
+        if (importGeometryIsNeeded)
+        {
+            await _bySoftApi.ImportPartAsync(geometryFilePath, subDirectory);
+        }
+
+        // 4. Get the Uri of the created part (or existing part) to be sure and update it
+        partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
+        if (string.IsNullOrWhiteSpace(partUri))
+        {
+            throw new ApplicationException($"Part with name {partName} could not be found or created in BySoft system.");
+        }
+
+        // 5. Update part with material and machine info
         var args = CreateUpdatePartArgs(request);
         await _bySoftApi.UpdatePartAsync(partUri, args);
 
-        // 5. Add Bending technology => This is also the *initial* check of manufacturability
+        // 6. Add Bending technology => This is also the *initial* check of manufacturability
         if (HasBendingActivity(request))
         {
             await _bySoftApi.SetBendingTechnologyAsync(partUri);
         }
 
-        // 6. Set the cutting technology
+        // 7. Set the cutting technology
         await _bySoftApi.SetCuttingTechnologyAsync(partUri);
 
-        // 7. Check part for manufacturability states
+        // 8. Check part for manufacturability states
         var checkPartResult = await _bySoftApi.CheckPartAsync(partUri);
 
-        // 8. Delete part
+        // 9. Delete part
         if (!_bySoftIntegrationSettings.SavePartInBySoft)
         {
             await _bySoftApi.DeletePartAsync(partUri);
         }
 
-        // 9. Create response
+        // 10. Create response
         var response = CreateResponse(request, checkPartResult);
 
         return response;
@@ -108,7 +164,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             : _bySoftIntegrationSettings.CuttingMachineName;
         var userInfo1 = GetUserInfo1(request);
         var userInfo2 = GetUserInfo2(request);
-        var userInfo3 = GetUserInfo3(request);
         const int priority = 1;
 
        var args = new UpdatePartArgs()
@@ -121,7 +176,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             RotationAllowance = rotationAllowance,
             UserInfo1 = userInfo1,
             UserInfo2 = userInfo2,
-            UserInfo3 = userInfo3,
+            UserInfo3 = $"key: [{request.ProjectId}_{request.PartType.Id}]",
             Priority = priority
         };
         return args;
@@ -132,7 +187,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
     }
 
-    private string MoveAndRenameGeometryFile(string geometryFilePath, RequestManufacturabilityCheckOfPartTypeMessage request)
+    private string MoveAndRenameGeometryFile(string geometryFileInputPath, string subDirectory, RequestManufacturabilityCheckOfPartTypeMessage request)
     {
         var originalFileNameExtension = Path.GetExtension(request.PartType.OriginalFileName);
         string inputFileName;
@@ -157,10 +212,13 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension);
         }
 
-        var movedFilePath = Path.GetDirectoryName(geometryFilePath);
+        var movedFilePath = Path.GetDirectoryName(geometryFileInputPath);
         var destFilePath = Path.Combine(movedFilePath ?? string.Empty, inputFileName);
-        _logger.LogInformation("move geometry file from {GeometryFilePath} to {DestFilePath}", geometryFilePath, destFilePath);
-        File.Move(geometryFilePath, destFilePath, true);
+        _logger.LogInformation("move geometry file from {GeometryFilePath} to {DestFilePath}", geometryFileInputPath, destFilePath);
+        File.Move(geometryFileInputPath, destFilePath, true);
+
+        //TODO: we can also move to a sub directory here if needed to move the geometry file to a specific location
+
 
         return destFilePath;
     }
@@ -210,17 +268,40 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return info2;
     }
 
-    private string GetUserInfo3(RequestManufacturabilityCheckOfPartTypeMessage request)
+    /// <summary>
+    /// Beitsen passiveren 	Beits [Done]
+    /// boren 				Boor  [Done]
+    /// draadtappen			Tap    [Done]
+    /// slijpen				Slijp [Done]
+    /// lassen				MIG
+    ///                     TIG
+    /// ontbramen			TS [Done]
+    /// plaat kanten		Zet [Done]
+    /// popnagelen			Pop [Done]
+    /// souvereinen			Souv [Done]
+    /// trommelen			Trommel [Done]
+    /// walsen				Wals [Done]
+    /// zagen				Zaag [Done]
+    /// zandstralen			Gestr. [Done]
+    /// Afschuinen (kantje frezen)	Afsch. [Done]
+    /// </summary>
+    private static readonly IReadOnlyDictionary<WorkingStepTypeV1,string> s_mapperBloemhof = new Dictionary<WorkingStepTypeV1, string>
     {
-        if (_bySoftIntegrationSettings.DefaultInfo3FieldFormat == null)
-        {
-            return null;
-        }
-
-        var info3 = _bySoftIntegrationSettings.DefaultInfo3FieldFormat;
-        info3 = Replacer(info3, request);
-        return info3;
-    }
+        { WorkingStepTypeV1.SheetBending,"Zet"},
+        { WorkingStepTypeV1.Drilling,"Boor"},
+        { WorkingStepTypeV1.ThreadTapping,"Tap"},
+        { WorkingStepTypeV1.BoltPressing, "Snij"},
+        { WorkingStepTypeV1.Deburring,"TS"},
+        { WorkingStepTypeV1.CounterSinking,"Souv"},
+        { WorkingStepTypeV1.Sawing,"Zaag"},
+        { WorkingStepTypeV1.EdgeMilling,"Afsch."},
+        { WorkingStepTypeV1.Riveting,"Pop"},
+        { WorkingStepTypeV1.Rolling,"Wals"},
+        { WorkingStepTypeV1.VibratoryDeburring, "Trommel"},
+        { WorkingStepTypeV1.PicklingPassivating, "Beits"},
+        { WorkingStepTypeV1.WeldGrinding ,"Slijp"},
+        { WorkingStepTypeV1.SandBlasting,"Gestr." }
+    };
 
     private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request)
     {
@@ -232,8 +313,23 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         input = input.Replace("{ProjectReference}", request.ProjectReference ?? string.Empty);
         input = input.Replace("{PartName}", request.PartType.Name);
         input = input.Replace("{RowNumber}", request.PartType.RowNumber.ToString());
+        if (!input.Contains("{BoMItemActivityCustomName}"))
+        {
+           // No need to continue
+           return input;
+        }
 
-        return input;
+        var sb = new StringBuilder();
+        foreach (var boMItemActivity in request.PartType.Activities)
+        {
+
+            if(s_mapperBloemhof.TryGetValue(boMItemActivity.WorkingStepType, out var mappedValue))
+            {
+                sb.Append($"{mappedValue}+");
+            }
+
+        }
+        return input.Replace("{BoMItemActivityCustomName}", sb.ToString().TrimEnd('+'));
     }
 
     private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension)
@@ -333,17 +429,6 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return hasBendingActivities ? _bySoftIntegrationSettings.RotationAllowancePartWithBending : _bySoftIntegrationSettings.RotationAllowancePartWithoutBending;
     }
 
-    private async Task DeleteExistingPartAsync(string partName, string subDirectory)
-    {
-        _logger.LogDebug("DeleteExistingPart. PartName: {PartName}", partName);
-        var partUri = await _bySoftApi.GetUriFromPartNameAsync(partName, subDirectory);
-        if (!string.IsNullOrWhiteSpace(partUri))
-        {
-            _logger.LogDebug("Part exists. Delete it");
-            await _bySoftApi.DeletePartAsync(partUri);
-        }
-    }
-
     #region PrivateHelpers
 
     private string GetMaterialName(RequestManufacturabilityCheckOfPartTypeMessage request)
@@ -398,11 +483,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // But there can be multiple machines defined in quotation factory and the intergration.
         // We need to find the machine used in quotation factory, then find the corresponding machine id of the integration
 
-        var sheetCuttingWorkingStep = request.PartType.Estimations
-            .SelectMany(x => x.WorkingStepEstimations
-                .Where(est => est.ResourceWorkingStepKey.WorkingStepKey is { PrimaryWorkingStep: WorkingStepTypeV1.SheetBending, SecondaryWorkingStep: WorkingStepTypeV1.SheetBending }))
-            .FirstOrDefault();
-        var resourceId = sheetCuttingWorkingStep?.ResourceWorkingStepKey.ResourceId.ToString();
+        var sheetBendingWorkingStep = request.PartType.Activities
+            .FirstOrDefault(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
+        var resourceId = sheetBendingWorkingStep?.Resource?.ResourceId.ToString();
 
         if (string.IsNullOrWhiteSpace(resourceId))
         {
@@ -426,12 +509,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     {
         // Per request/part there is only one bending machine
         // But there can be multiple machines defined in quotation factory and the integration.
-        // We need to find the machine used in quotation factory, then find the corresponding machine id of the integration
-        var sheetCuttingWorkingStep = request.PartType.Estimations
-            .SelectMany(x => x.WorkingStepEstimations
-                .Where(est => est.ResourceWorkingStepKey.WorkingStepKey is { PrimaryWorkingStep: WorkingStepTypeV1.SheetCutting, SecondaryWorkingStep: WorkingStepTypeV1.SheetCutting }))
-            .FirstOrDefault();
-        var resourceId = sheetCuttingWorkingStep?.ResourceWorkingStepKey.ResourceId.ToString();
+        var sheetCuttingWorkingStep = request.PartType.Activities
+            .FirstOrDefault(x => x.WorkingStepType == WorkingStepTypeV1.SheetCutting);
+        var resourceId = sheetCuttingWorkingStep?.Resource?.ResourceId.ToString();
 
         if (string.IsNullOrWhiteSpace(resourceId))
         {
