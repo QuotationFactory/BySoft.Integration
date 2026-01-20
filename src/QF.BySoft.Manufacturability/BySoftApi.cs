@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,6 +27,23 @@ public class BySoftApi : IBySoftApi
         _httpClient = httpClient;
         _logger = logger;
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
+    }
+
+    public async Task<PartInfo> GetPartInfoAsync(string partUri)
+    {
+        // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
+        var url = $"{GetApiBasePath()}/Parts/Info?uri={partUri.UrlEncode()}";
+        _logger.LogDebug("GetPartInfoAsync. Url: {Url}", url);
+        var response = await _httpClient.GetAsync(url);
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft getPartInfo failed: {responseContentFailed}");
+        }
+        var responseContent = await response.Content.ReadFromJsonAsync<PartInfo>();
+        _logger.LogDebug("GetPartInfoAsync response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException("BySoft getPartInfo failed: response content is null");
     }
 
     public async Task ImportPartAsync(string path, string subDirectory)

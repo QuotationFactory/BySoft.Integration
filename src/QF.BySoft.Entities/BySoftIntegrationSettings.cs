@@ -93,13 +93,14 @@ public class BySoftIntegrationSettings
     public string DefaultApiSubDirectory { get; set; } = string.Empty;
     public string DefaultGeometryFileNameFormat { get; set; } = string.Empty;
     public ApiSubDirectory ApiSubDirectoryConfig { get; set; }
+    public bool AlwaysImportGeometry { get; set; }
     /// <summary>
     ///    Format for the description field in BySoft.
     ///    If set to [Default], a default format will be used, like:
     ///    Order number:'ORD-123' Reference:'REF-456' PartName: 'Bracket' RowNumber:'1'
     ///    Possible placeholders:
     ///    {ProjectId} - the project id
-    ///    {PartId} - the part type id
+    ///    {PartTypeId} - the part type id
     ///    {OrderNumber} - the order number
     ///    {ProjectReference} - the project reference
     ///    {PartName} - the part type name
@@ -108,5 +109,4 @@ public class BySoftIntegrationSettings
     public string DefaultDescriptionFieldFormat { get; set; } = string.Empty;
     public string DefaultInfo1FieldFormat { get; set; } = string.Empty;
     public string DefaultInfo2FieldFormat { get; set; } = string.Empty;
-    public string DefaultInfo3FieldFormat { get; set; } = string.Empty;
 }
