@@ -2,7 +2,7 @@
 
 public class MaterialMapModel
 {
-    public string MaterialGroup { get; set; }
-    public string[] Keywords { get; set; }
-    public string BySoftCamMaterialCode { get; set; }
+    public required string MaterialGroup { get; set; }
+    public required string[] Keywords { get; set; }
+    public required string BySoftCamMaterialCode { get; set; }
 }

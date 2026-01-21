@@ -15,6 +15,6 @@ public static class ApplicationInfo
     /// </remarks>
     public static string GetApplicationBasePath()
     {
-        return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName)!;
     }
 }

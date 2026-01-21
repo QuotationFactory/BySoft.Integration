@@ -52,7 +52,7 @@ public class BySoftIntegration : IBySoftIntegration
 
     public async Task HandleManufacturabilityCheckRequestAsync(string jsonFilePath)
     {
-        RequestManufacturabilityCheckOfPartTypeMessage request = null;
+        RequestManufacturabilityCheckOfPartTypeMessage? request = null;
         try
         {
             if (jsonFilePath == null)
@@ -159,7 +159,7 @@ public class BySoftIntegration : IBySoftIntegration
         }
     }
 
-    private void ReportException(Exception ex, RequestManufacturabilityCheckOfPartTypeMessage request)
+    private void ReportException(Exception ex, RequestManufacturabilityCheckOfPartTypeMessage? request)
     {
         if (request == null)
         {

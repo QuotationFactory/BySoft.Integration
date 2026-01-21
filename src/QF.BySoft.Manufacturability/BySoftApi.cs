@@ -29,7 +29,7 @@ public class BySoftApi : IBySoftApi
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
     }
 
-    public async Task<PartInfo> GetPartInfoAsync(string partUri)
+    public async Task<PartInfo?> GetPartInfoAsync(string partUri)
     {
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Info?uri={partUri.UrlEncode()}";
@@ -61,7 +61,7 @@ public class BySoftApi : IBySoftApi
         }
     }
 
-    public async Task<string> GetUriFromPartNameAsync(string partName, string subDirectory)
+    public async Task<string?> GetUriFromPartNameAsync(string partName, string subDirectory)
     {
         //Example: http://localhost:56111/api/v1/Parts/GetPartUris?name=project-x
         // Response = array with strings (uri's)
@@ -104,11 +104,7 @@ public class BySoftApi : IBySoftApi
             // Normalize directory separators in the URI as well
             // because the decoded subdirectory is defined with a \
             // the boxfile location uses /
-            var normalizedUri = uri?.Replace('/', '\\');
-            if (normalizedUri == null)
-            {
-                return false;
-            }
+            var normalizedUri = uri.Replace('/', '\\');
             return normalizedUri.Contains(decodedSubDirectory, StringComparison.OrdinalIgnoreCase);
         });
         return uri;
@@ -130,6 +126,7 @@ public class BySoftApi : IBySoftApi
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
         _logger.LogDebug("UpdatePartAsync. {@Args}  Url: {Url}", args, url);
+        // Post the args as json content but null properties should not be included
         var response = await _httpClient.PostAsJsonAsync(url, args);
         // Throws an error in not successful
         if (!response.IsSuccessStatusCode)
@@ -139,7 +136,7 @@ public class BySoftApi : IBySoftApi
         }
     }
 
-    public async Task<SetTechnologyResponse> SetBendingTechnologyAsync(string partUri)
+    public async Task<SetTechnologyResponse?> SetBendingTechnologyAsync(string partUri)
     {
         // Example call
         // http://localhost:56111/api/v1/Parts/SetBendingTechnology?uri=box%3A%2F%2FParts%2FAPI%2Fmh-test%2FBeugel%25204%23eab4070f-7329-43b4-9a2a-f74219beb60f&calculateDeduction=true&calculateBendingTime=false
@@ -209,7 +206,7 @@ public class BySoftApi : IBySoftApi
         }
     }
 
-    public async Task<CheckPartResponse> CheckPartAsync(string partUri)
+    public async Task<CheckPartResponse?> CheckPartAsync(string partUri)
     {
         var requestUri = $"{GetApiBasePath()}/Parts/CheckPart?uri={partUri.UrlEncode()}";
         _logger.LogDebug("Parts/CheckPart. Uri: {RequestUri}", requestUri);

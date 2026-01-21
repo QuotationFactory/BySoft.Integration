@@ -42,13 +42,13 @@ public class MachineMappingRepository : IMachineMappingRepository
         var rangeUsed = worksheet.RangeUsed();
 
         // first column has the machine id's
-        var column1 = rangeUsed.Column(1);
+        var column1 = rangeUsed!.Column(1);
         // search for the
         var foundCells = column1.Search(resourceId, CompareOptions.IgnoreCase);
         if (foundCells != null && foundCells.Any())
         {
             var firstCell = foundCells.FirstOrDefault();
-            var rowNumber = firstCell.Address.RowNumber;
+            var rowNumber = firstCell!.Address.RowNumber;
             // get the BySoft machine id
             var column2 = rangeUsed.Column(2);
             var machineId = column2.Cell(rowNumber).Value.ToString();

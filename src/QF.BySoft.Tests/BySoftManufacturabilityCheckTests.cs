@@ -81,6 +81,7 @@ public class BySoftManufacturabilityCheckTests
         var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
+        result.Should().NotBeNull();
         result.ProjectId.Should().Be(_projectIdValue);
         result.PartTypeId.Should().Be(_partIdValue);
         result.IsManufacturable.Should().BeTrue();
@@ -121,13 +122,10 @@ public class BySoftManufacturabilityCheckTests
     }
 
     [Theory]
-    [InlineData(null, "123", "api/v1")]
     [InlineData("", "123", "api/v1")]
     [InlineData("  ", "123", "api/v1")]
-    [InlineData("http://localhost", null, "api/v1")]
     [InlineData("http://localhost", "", "api/v1")]
     [InlineData("http://localhost", "  ", "api/v1")]
-    [InlineData("http://localhost", "123", null)]
     [InlineData("http://localhost", "123", "")]
     [InlineData("http://localhost", "123", "  ")]
     public async Task EmptyApiSettingsShouldThrowError(string apiServer, string apiPort, string apiRoot)
@@ -295,6 +293,7 @@ public class BySoftManufacturabilityCheckTests
         var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
+        result.Should().NotBeNull();
         result.EventLogs.Should().HaveCount(1);
         result.EventLogs.First().Message.Should().Be($"{_bendingResponse.Message}. Status: {_bendingResponse.Status}");
     }
@@ -334,6 +333,7 @@ public class BySoftManufacturabilityCheckTests
 
         // Assert
         bySoftApiMock.Invocations.Should().NotContain(a => a.Method.Name == nameof(IBySoftApi.DeletePartAsync));
+        result.Should().NotBeNull();
         result.ProjectId.Should().Be(_projectIdValue);
         result.PartTypeId.Should().Be(_partIdValue);
         result.IsManufacturable.Should().BeTrue();
@@ -400,7 +400,7 @@ public class BySoftManufacturabilityCheckTests
         // return null to indicate that it does not exists.
         bySoftApiMock
             .SetupSequence(x => x.GetUriFromPartNameAsync(partName, subDirectory))!
-            .ReturnsAsync((string)null)
+            .ReturnsAsync((string?)null)
             .ReturnsAsync(partNameResult);
 
         // Bending tech

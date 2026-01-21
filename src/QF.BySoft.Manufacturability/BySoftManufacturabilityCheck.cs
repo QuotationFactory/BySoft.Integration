@@ -48,7 +48,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse?> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
     {
         // 0. Rename geometry file based on settings
         var subDirectory = GetSubDirectory(request);
@@ -80,6 +80,12 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             else
             {
                 var partInfo =  await _bySoftApi.GetPartInfoAsync(partUri);
+                if( partInfo == null)
+                {
+                    // partInfo cannot be null here as we have partUri
+                    throw new ApplicationException($"PartInfo with name {partName} cannot be retrieved from BySoft system.");
+                }
+
                 var key = partInfo.UserInfo3
                     .Replace("key:","")
                     .Replace("[", "")
@@ -155,7 +161,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     {
         // Retrieve from the request object
         var materialName = GetMaterialName(request);
-        var bendingMachineName = HasBendingActivity(request) ? GetBendingMachineName(request): string.Empty;
+        var bendingMachineName = HasBendingActivity(request) ? GetBendingMachineName(request): null;
         var thickness = GetThickness(request);
         var rotationAllowance = GetRotationAllowance(request.PartType);
         var description = GetDescription(request);
@@ -223,13 +229,13 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return destFilePath;
     }
 
-    private string GetDescription(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private string? GetDescription(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
         // Example: Order number:'ORD-123' Reference:'REF-456' PartName: 'Bracket' RowNumber:'1'
         // here we can add a function to use variable substitution defined in app settings to create a custom description
         // if no variable substitution is defined, we use the default format
 
-        if (_bySoftIntegrationSettings.DefaultDescriptionFieldFormat == null)
+        if (string.IsNullOrEmpty(_bySoftIntegrationSettings.DefaultDescriptionFieldFormat))
         {
             return null;
         }
@@ -244,9 +250,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return description;
     }
 
-    private string GetUserInfo1(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private string? GetUserInfo1(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
-        if (_bySoftIntegrationSettings.DefaultInfo1FieldFormat == null)
+        if(string.IsNullOrEmpty(_bySoftIntegrationSettings.DefaultInfo1FieldFormat))
         {
             return null;
         }
@@ -256,9 +262,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return info1;
     }
 
-    private string GetUserInfo2(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private string? GetUserInfo2(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
-        if (_bySoftIntegrationSettings.DefaultInfo2FieldFormat == null)
+        if(string.IsNullOrEmpty(_bySoftIntegrationSettings.DefaultInfo2FieldFormat))
         {
             return null;
         }
@@ -285,7 +291,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     /// zandstralen			Gestr. [Done]
     /// Afschuinen (kantje frezen)	Afsch. [Done]
     /// </summary>
-    private static readonly IReadOnlyDictionary<WorkingStepTypeV1,string> s_mapperBloemhof = new Dictionary<WorkingStepTypeV1, string>
+    private static readonly IReadOnlyDictionary<WorkingStepTypeV1,string> s_temporarillyMapper = new Dictionary<WorkingStepTypeV1, string>
     {
         { WorkingStepTypeV1.SheetBending,"Zet"},
         { WorkingStepTypeV1.Drilling,"Boor"},
@@ -323,7 +329,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         foreach (var boMItemActivity in request.PartType.Activities)
         {
 
-            if(s_mapperBloemhof.TryGetValue(boMItemActivity.WorkingStepType, out var mappedValue))
+            if(s_temporarillyMapper.TryGetValue(boMItemActivity.WorkingStepType, out var mappedValue))
             {
                 sb.Append($"{mappedValue}+");
             }
@@ -531,8 +537,14 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return cuttingMachineName;
     }
 
-    private double GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private double? GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
+        var extension = Path.GetExtension(request.PartType.OriginalFileName);
+        if (!extension.Equals(".dxf", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".dwg", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
         double thickness = 0;
         if (request.PartType.Material.SelectableArticles.SelectedArticle is { Dimensions.Thickness: not null })
         {
@@ -553,22 +565,17 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             }
         }
 
-        if (thickness == 0)
-        {
-            throw new ApplicationException("Thickness of material not found in the request.");
-        }
-
-        return thickness;
+        return thickness == 0 ? throw new ApplicationException("Thickness of material not found in the request.") : null;
     }
 
     private RequestManufacturabilityCheckOfPartTypeMessageResponse CreateResponse(
         RequestManufacturabilityCheckOfPartTypeMessage request,
-        CheckPartResponse checkPartResult)
+        CheckPartResponse? checkPartResult)
     {
         // If response is Ok WarningFound or it is manufacturable, else not.
-        var isManufacturable = !string.Equals(checkPartResult.State, "ErrorFound", StringComparison.OrdinalIgnoreCase);
+        var isManufacturable = !string.Equals(checkPartResult?.State, "ErrorFound", StringComparison.OrdinalIgnoreCase);
 
-        if (_bySoftIntegrationSettings.WarningsAsErrors.Length != 0)
+        if (_bySoftIntegrationSettings.WarningsAsErrors.Length != 0 && checkPartResult != null)
         {
             if (checkPartResult.BendingDetails?.Any(x => _warningsAsErrors.Contains(x.Description)) ?? false)
             {
@@ -610,11 +617,11 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         };
     }
 
-    private static List<EventLog> BuildEventLog(RequestManufacturabilityCheckOfPartTypeMessage request, CheckPartResponse checkPartResult,string[] warningsAsErrors)
+    private static List<EventLog> BuildEventLog(RequestManufacturabilityCheckOfPartTypeMessage request, CheckPartResponse? checkPartResult,string[] warningsAsErrors)
     {
         var logs = new List<EventLog>();
 
-        if (checkPartResult.BendingDetails != null && checkPartResult.BendingDetails.Any())
+        if (checkPartResult is not null && checkPartResult.BendingDetails.Length != 0)
         {
             logs.AddRange(checkPartResult.BendingDetails.Select(bendingDetail => new EventLog
             {
@@ -626,7 +633,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             }));
         }
 
-        if (checkPartResult.CuttingDetails != null && checkPartResult.CuttingDetails.Any())
+        if (checkPartResult is not null && checkPartResult.CuttingDetails.Length != 0)
         {
             logs.AddRange(checkPartResult.CuttingDetails.Select(cuttingDetail => new EventLog
             {
@@ -638,7 +645,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
             }));
         }
 
-        if (checkPartResult.GeometryDetails != null && checkPartResult.GeometryDetails.Any())
+        if (checkPartResult is not null && checkPartResult.GeometryDetails.Length != 0)
         {
             logs.AddRange(checkPartResult.GeometryDetails.Select(geometryDetail => new EventLog
             {

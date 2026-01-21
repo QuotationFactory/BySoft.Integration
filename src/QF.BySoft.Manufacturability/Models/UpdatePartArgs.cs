@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace QF.BySoft.Manufacturability.Models;
+﻿namespace QF.BySoft.Manufacturability.Models;
 
 // {
 //   "name": "string",
@@ -121,7 +120,7 @@ public class UpdatePartArgs
     public required string MaterialName { get; set; }
     public required string? CuttingMachineName { get; set; }
     public required string? BendingMachineName { get; set; }
-    public double Thickness { get; set; }
+    public double? Thickness { get; set; }
     public required int Priority { get; set; }
     public required int? RotationAllowance { get; set; }
 }
