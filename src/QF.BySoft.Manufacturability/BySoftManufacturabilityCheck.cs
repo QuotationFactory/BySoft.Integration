@@ -103,7 +103,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 
                 if (Guid.TryParse(key[1], out var partTypeId) && partTypeId != Guid.Empty)
                 {
-
+                    // valid key
                 }
                 if (request.ProjectId == projectId && request.PartType.Id == partTypeId)
                 {
@@ -176,8 +176,8 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         {
             Description = description,
             MaterialName = materialName,
-            BendingMachineName = bendingMachineName,
             CuttingMachineName = cuttingMachineName,
+            BendingMachineName = bendingMachineName,
             Thickness = thickness,
             RotationAllowance = rotationAllowance,
             UserInfo1 = userInfo1,
@@ -350,10 +350,15 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         // Replace invalid file name characters
         originalFileNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
         originalFileNameWithExtension = Path.GetInvalidFileNameChars().Aggregate(originalFileNameWithoutExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+        var partNameWithExtension = $"{request.PartType.Name}{originalFileNameExtension}";
+        partNameWithExtension = Path.GetInvalidFileNameChars().Aggregate(partNameWithExtension, (current, invalidChar) => current.Replace(invalidChar, '_'));
+        var partNameWithoutExtension = Path.GetInvalidFileNameChars().Aggregate(request.PartType.Name, (current, invalidChar) => current.Replace(invalidChar, '_'));
 
-        var resultGeometryName = geometryName.Replace("{originalFileNameWithExtension}", originalFileNameWithExtension);
-        resultGeometryName = resultGeometryName.Replace("{originalFileNameWithoutExtension}", originalFileNameWithoutExtension);
-        resultGeometryName = resultGeometryName.Replace("{originalFileNameExtension}", originalFileNameExtension);
+        var resultGeometryName = geometryName.Replace("{OriginalFileNameWithExtension}", originalFileNameWithExtension);
+        resultGeometryName = resultGeometryName.Replace("{OriginalFileNameWithoutExtension}", originalFileNameWithoutExtension);
+        resultGeometryName = resultGeometryName.Replace("{OriginalFileNameExtension}", originalFileNameExtension);
+        resultGeometryName = resultGeometryName.Replace("{PartNameWithExtension}", partNameWithExtension);
+        resultGeometryName = resultGeometryName.Replace("{PartNameWithoutExtension}", partNameWithoutExtension);
 
         // here we replace the other variables except
         geometryName = Replacer(resultGeometryName, request);
@@ -537,35 +542,29 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return cuttingMachineName;
     }
 
+    private bool IsDxfOrDwg(PartTypeV1 part) => !string.IsNullOrWhiteSpace(part.OriginalFileName)
+                                                           && (Path.GetExtension(part.OriginalFileName).Equals(".dxf", StringComparison.OrdinalIgnoreCase)
+                                                               || Path.GetExtension(part.OriginalFileName).Equals(".dwg", StringComparison.OrdinalIgnoreCase));
+
     private double? GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
-        var extension = Path.GetExtension(request.PartType.OriginalFileName);
-        if (!extension.Equals(".dxf", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".dwg", StringComparison.OrdinalIgnoreCase))
+        if(!IsDxfOrDwg(request.PartType))
         {
+
+            // Thickness is not needed for non dxf/dwg files
             return null;
         }
 
-        double thickness = 0;
-        if (request.PartType.Material.SelectableArticles.SelectedArticle is { Dimensions.Thickness: not null })
+        // Thickness should be provided in the units of the machine.
+        // Get the unit of measurement from the app.settings
+        var thickness = _bySoftIntegrationSettings.MachineUnitOfMeasurement switch
         {
-            // Thickness should be provided in the units of the machine.
-            // Get the unit of measurement from the app.settings
-            switch (_bySoftIntegrationSettings.MachineUnitOfMeasurement)
-            {
-                case MachineUnitOfMeasurementInch:
-                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness?.Inches ?? 0;
-                    break;
-                case MachineUnitOfMeasurementMillimeters:
-                    thickness = request.PartType.Material.SelectableArticles.SelectedArticle.Dimensions.Thickness?.Millimeters ?? 0;
-                    break;
-                default:
-                    // throw error and do not provide thickness, as we could not determine the units of measurement
-                    throw new ApplicationException(
-                        "Machine units of measurement not provided correctly in the app.settings. Possible values are: mm or inch");
-            }
-        }
+            MachineUnitOfMeasurementInch => request.PartType.Material.SelectableArticles.SelectedArticle?.Dimensions.Thickness?.Inches ?? 0,
+            MachineUnitOfMeasurementMillimeters => request.PartType.Material.SelectableArticles.SelectedArticle?.Dimensions.Thickness?.Millimeters ?? 0,
+            _ => throw new ApplicationException("Machine units of measurement not provided correctly in the app.settings. Possible values are: mm or inch")
+        };
 
-        return thickness == 0 ? throw new ApplicationException("Thickness of material not found in the request.") : null;
+        return thickness == 0 ? throw new ApplicationException("Thickness of material not found in the request.") : thickness;
     }
 
     private RequestManufacturabilityCheckOfPartTypeMessageResponse CreateResponse(

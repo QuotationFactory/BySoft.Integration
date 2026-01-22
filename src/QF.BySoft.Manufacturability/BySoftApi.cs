@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,6 +20,12 @@ public class BySoftApi : IBySoftApi
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
     private readonly HttpClient _httpClient;
     private readonly ILogger<BySoftApi> _logger;
+
+    private static readonly JsonSerializerOptions s_ignoreNullsJsonOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
 
     public BySoftApi(
         HttpClient httpClient,
@@ -127,7 +135,7 @@ public class BySoftApi : IBySoftApi
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
         _logger.LogDebug("UpdatePartAsync. {@Args}  Url: {Url}", args, url);
         // Post the args as json content but null properties should not be included
-        var response = await _httpClient.PostAsJsonAsync(url, args);
+        var response = await _httpClient.PostAsJsonAsync(url, args, s_ignoreNullsJsonOptions);
         // Throws an error in not successful
         if (!response.IsSuccessStatusCode)
         {
