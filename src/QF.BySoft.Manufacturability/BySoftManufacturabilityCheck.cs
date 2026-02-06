@@ -130,7 +130,12 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         // 5. Update part with material and machine info
-        var args = CreateUpdatePartArgs(request);
+        var partInfoBysoft =  await _bySoftApi.GetPartInfoAsync(partUri);
+        if (partInfoBysoft == null)
+        {
+            throw new ApplicationException($"PartInfo with name {partName} cannot be retrieved from BySoft system.");
+        }
+        var args = CreateUpdatePartArgs(request, partInfoBysoft);
         await _bySoftApi.UpdatePartAsync(partUri, args);
 
         // 6. Add Bending technology => This is also the *initial* check of manufacturability
@@ -157,17 +162,15 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return response;
     }
 
-    private UpdatePartArgs CreateUpdatePartArgs(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private UpdatePartArgs CreateUpdatePartArgs(RequestManufacturabilityCheckOfPartTypeMessage request, PartInfo partInfo)
     {
         // Retrieve from the request object
         var materialName = GetMaterialName(request);
         var bendingMachineName = HasBendingActivity(request) ? GetBendingMachineName(request): null;
-        var thickness = GetThickness(request);
+        var thickness = GetThickness(request, partInfo);
         var rotationAllowance = GetRotationAllowance(request.PartType);
         var description = GetDescription(request);
-        var cuttingMachineName = string.IsNullOrEmpty(_bySoftIntegrationSettings.CuttingMachineName)
-            ? GetCuttingMachineName(request)
-            : _bySoftIntegrationSettings.CuttingMachineName;
+        var cuttingMachineName = GetCuttingMachineName(request);
         var userInfo1 = GetUserInfo1(request);
         var userInfo2 = GetUserInfo2(request);
         const int priority = 1;
@@ -546,9 +549,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                                                            && (Path.GetExtension(part.OriginalFileName).Equals(".dxf", StringComparison.OrdinalIgnoreCase)
                                                                || Path.GetExtension(part.OriginalFileName).Equals(".dwg", StringComparison.OrdinalIgnoreCase));
 
-    private double? GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request)
+    private double? GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request, PartInfo partInfo)
     {
-        if(!IsDxfOrDwg(request.PartType))
+        if(!IsDxfOrDwg(request.PartType) && Geometry3DThicknessIsEqual(request, partInfo) )
         {
 
             // Thickness is not needed for non dxf/dwg files
@@ -565,6 +568,12 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         };
 
         return thickness == 0 ? throw new ApplicationException("Thickness of material not found in the request.") : thickness;
+    }
+
+    private bool Geometry3DThicknessIsEqual(RequestManufacturabilityCheckOfPartTypeMessage request, PartInfo partInfo)
+    {
+        var thicknessOfRawMaterial = request.PartType.Material.SelectableArticles.SelectedArticle?.Dimensions.Thickness?.Millimeters;
+        return partInfo.Thickness.HasValue && thicknessOfRawMaterial.HasValue && Math.Abs(partInfo.Thickness.Value - thicknessOfRawMaterial.Value) < 0.0001;
     }
 
     private RequestManufacturabilityCheckOfPartTypeMessageResponse CreateResponse(

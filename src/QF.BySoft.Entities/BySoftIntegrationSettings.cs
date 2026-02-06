@@ -52,7 +52,7 @@ public class BySoftIntegrationSettings
     /// <summary>
     ///     Cutting machine name used before setting the cutting technology
     /// </summary>
-    //[Obsolete("Setting CuttingMachineName is deprecated and will be removed in future versions.")]
+    [Obsolete("Setting CuttingMachineName is deprecated and will be removed in future versions.")]
     public string CuttingMachineName { get; set; } = string.Empty;
 
     /// <summary>
