@@ -92,35 +92,27 @@ public class BySoftIntegration : IBySoftIntegration
             // Call BySoft API to do manufacturability check
             var result = await _bySoftApi.ManufacturabilityCheckAsync(request, geometryFilePathName);
 
-            if (result != null)
-            {
-                var responseJson = _agentMessageSerializationHelper.ToJson(result);
+            var responseJson = _agentMessageSerializationHelper.ToJson(result);
 
-                var fileName = $"{result.PartTypeId.ToString()}.json";
-                // get temp file path
-                var tempFile = Path.Combine(Path.GetTempPath(), fileName);
-                // We save the json first to the temp directory and then copy it to the Agent Input direcotry.
-                // Saving directly into the agent triggers somethings the filewatcher before all is completely saved.
-                // And thus loosing the response.
-                await File.WriteAllTextAsync(tempFile, responseJson);
+            var fileName = $"{result.PartTypeId.ToString()}.json";
+            // get temp file path
+            var tempFile = Path.Combine(Path.GetTempPath(), fileName);
+            // We save the json first to the temp directory and then copy it to the Agent Input direcotry.
+            // Saving directly into the agent triggers somethings the filewatcher before all is completely saved.
+            // And thus loosing the response.
+            await File.WriteAllTextAsync(tempFile, responseJson);
 
-                // Move the result file in the Agent/Integration/Input folder
-                _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.IntegrationName, tempFile);
+            // Move the result file in the Agent/Integration/Input folder
+            _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.IntegrationName, tempFile);
 
-                _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
-                _bySoftIntegrationSettings.MoveFileToProcessed(Constants.IntegrationName, jsonFilePath);
+            _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
+            _bySoftIntegrationSettings.MoveFileToProcessed(Constants.IntegrationName, jsonFilePath);
 #if DEBUG
-                // Save in InputSend folder, for debugging
-                var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.IntegrationName);
-                var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
-                await File.WriteAllTextAsync(responseFileHistory, responseJson);
+            // Save in InputSend folder, for debugging
+            var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.IntegrationName);
+            var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
+            await File.WriteAllTextAsync(responseFileHistory, responseJson);
 #endif
-            }
-            else
-            {
-                _logger.LogWarning("Did not receive a valid result, could not return result");
-                _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
-            }
 
             _logger.LogInformation("Finished processing file: {JsonFilePath}", jsonFilePath);
         }

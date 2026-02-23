@@ -48,7 +48,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse?> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
+    public async Task<RequestManufacturabilityCheckOfPartTypeMessageResponse> ManufacturabilityCheckAsync(RequestManufacturabilityCheckOfPartTypeMessage request, string geometryDownloadFilePath)
     {
         // 0. Rename geometry file based on settings
         var subDirectory = GetSubDirectory(request);
