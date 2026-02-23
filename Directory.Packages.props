@@ -2,19 +2,19 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <MicrosoftExtensionsVersion>9.0.0</MicrosoftExtensionsVersion>
-    <MicrosoftExtensionsPatchVersion>9.0.9</MicrosoftExtensionsPatchVersion>
+    <MicrosoftExtensionsPatchVersion>9.0.11</MicrosoftExtensionsPatchVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="MetalHeaven.Agent.Shared.External" Version="0.1.48" />
-    <PackageVersion Include="MetalHeaven.ExternalDataContracts" Version="0.4.108" />
+    <PackageVersion Include="MetalHeaven.Agent.Shared.External" Version="0.1.90" />
+    <PackageVersion Include="MetalHeaven.ExternalDataContracts" Version="0.4.118" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- External Libraries -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="ClosedXML" Version="0.104.2" />
-    <PackageVersion Include="FluentAssertions" Version="8.2.0" />
+    <PackageVersion Include="FluentAssertions" Version="8.8.0" />
     <PackageVersion Include="MediatR" Version="12.5.0" />
     <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsPatchVersion)" />

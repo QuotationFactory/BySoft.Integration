@@ -22,7 +22,7 @@ public class BySoftManufacturabilityCheckTests
 {
     // BySoft API variables for Mock
     private const string StepFilePathName = "C:\\temp\\step.step";
-    private const string SubDirectory = "manufacturability-check";
+    private const string DefaultSubDirectory = "manufacturability-check";
     private readonly Mock<ILogger<BySoftManufacturabilityCheck>> _mockLogger;
     private readonly Guid _partIdValue;
 
@@ -47,7 +47,7 @@ public class BySoftManufacturabilityCheckTests
         _thickNess = 0.3;
         _materialIntegration = "material-int-a";
         _machineIntegration = "machine-int-b";
-        _partNameResult = $"box://Parts/API/{SubDirectory}/step";
+        _partNameResult = $"box://Parts/API/{DefaultSubDirectory}/step";
         _bendingResponse = new SetTechnologyResponse
         {
             Status = "Ok",
@@ -66,7 +66,7 @@ public class BySoftManufacturabilityCheckTests
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
         var machineRepositoryMock = MachineRepositoryMock(_machineIntegration);
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
-        var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+        var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
@@ -78,9 +78,10 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
+        result.Should().NotBeNull();
         result.ProjectId.Should().Be(_projectIdValue);
         result.PartTypeId.Should().Be(_partIdValue);
         result.IsManufacturable.Should().BeTrue();
@@ -112,7 +113,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -121,13 +122,10 @@ public class BySoftManufacturabilityCheckTests
     }
 
     [Theory]
-    [InlineData(null, "123", "api/v1")]
     [InlineData("", "123", "api/v1")]
     [InlineData("  ", "123", "api/v1")]
-    [InlineData("http://localhost", null, "api/v1")]
     [InlineData("http://localhost", "", "api/v1")]
     [InlineData("http://localhost", "  ", "api/v1")]
-    [InlineData("http://localhost", "123", null)]
     [InlineData("http://localhost", "123", "")]
     [InlineData("http://localhost", "123", "  ")]
     public async Task EmptyApiSettingsShouldThrowError(string apiServer, string apiPort, string apiRoot)
@@ -154,7 +152,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -187,7 +185,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -220,7 +218,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -253,7 +251,7 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        Func<Task> act = () => sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        Func<Task> act = () => sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         await act
@@ -280,7 +278,7 @@ public class BySoftManufacturabilityCheckTests
         var machineRepositoryMock = MachineRepositoryMock(_machineIntegration);
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
         // Overwrite the BendingTech
-        var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+        var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
@@ -292,9 +290,10 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
+        result.Should().NotBeNull();
         result.EventLogs.Should().HaveCount(1);
         result.EventLogs.First().Message.Should().Be($"{_bendingResponse.Message}. Status: {_bendingResponse.Status}");
     }
@@ -318,7 +317,7 @@ public class BySoftManufacturabilityCheckTests
         var machineRepositoryMock = MachineRepositoryMock(_machineIntegration);
         var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
 
-        var bySoftApiMock = BySoftApiMock(StepFilePathName, SubDirectory, _partNameResult, _bendingResponse);
+        var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
@@ -330,10 +329,11 @@ public class BySoftManufacturabilityCheckTests
         var request = RequestManufacturabilityCheckOfPartTypeMessage(_projectIdValue, _partIdValue, _thickNess);
 
         // Act
-        var result = await sut.ManufacturabilityCheckBendingAsync(request, StepFilePathName);
+        var result = await sut.ManufacturabilityCheckAsync(request, StepFilePathName);
 
         // Assert
         bySoftApiMock.Invocations.Should().NotContain(a => a.Method.Name == nameof(IBySoftApi.DeletePartAsync));
+        result.Should().NotBeNull();
         result.ProjectId.Should().Be(_projectIdValue);
         result.PartTypeId.Should().Be(_partIdValue);
         result.IsManufacturable.Should().BeTrue();
@@ -399,8 +399,8 @@ public class BySoftManufacturabilityCheckTests
         // Mock get uri in sequence, because the first time it's called, is to check if it exists.
         // return null to indicate that it does not exists.
         bySoftApiMock
-            .SetupSequence(x => x.GetUriFromPartNameAsync(partName, subDirectory))
-            .ReturnsAsync((string)null)
+            .SetupSequence(x => x.GetUriFromPartNameAsync(partName, subDirectory))!
+            .ReturnsAsync((string?)null)
             .ReturnsAsync(partNameResult);
 
         // Bending tech

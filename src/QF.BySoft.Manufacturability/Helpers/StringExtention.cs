@@ -5,7 +5,7 @@ namespace QF.BySoft.Manufacturability.Helpers;
 
 public static class StringExtention
 {
-    public static string EscapeUriString(this string stringIn)
+    public static string? EscapeUriString(this string? stringIn)
     {
         return stringIn != null ? Uri.EscapeDataString(stringIn) : null;
     }
@@ -13,5 +13,10 @@ public static class StringExtention
     public static string UrlEncode(this string stringIn)
     {
         return HttpUtility.UrlEncode(stringIn);
+    }
+
+    public static string UrlDecode(this string stringIn)
+    {
+        return HttpUtility.UrlDecode(stringIn);
     }
 }

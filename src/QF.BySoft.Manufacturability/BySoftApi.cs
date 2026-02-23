@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,12 @@ public class BySoftApi : IBySoftApi
     private readonly HttpClient _httpClient;
     private readonly ILogger<BySoftApi> _logger;
 
+    private static readonly JsonSerializerOptions s_ignoreNullsJsonOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+
     public BySoftApi(
         HttpClient httpClient,
         ILogger<BySoftApi> logger,
@@ -30,7 +37,24 @@ public class BySoftApi : IBySoftApi
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
     }
 
-    public async Task ImportPartAsync(string path, string subDirectory, bool secondTry = false)
+    public async Task<PartInfo?> GetPartInfoAsync(string partUri)
+    {
+        // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
+        var url = $"{GetApiBasePath()}/Parts/Info?uri={partUri.UrlEncode()}";
+        _logger.LogDebug("GetPartInfoAsync. Url: {Url}", url);
+        var response = await _httpClient.GetAsync(url);
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft getPartInfo failed: {responseContentFailed}");
+        }
+        var responseContent = await response.Content.ReadFromJsonAsync<PartInfo>();
+        _logger.LogDebug("GetPartInfoAsync response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException("BySoft getPartInfo failed: response content is null");
+    }
+
+    public async Task ImportPartAsync(string path, string subDirectory)
     {
         //Example: http://localhost:56111/api/v1/Parts/ImportPart?path=c%3A%5Ctemp%5Cproject-x.step&subdirectory=mh-test
         var requestUri = $"{GetApiBasePath()}/Parts/ImportPart?path={path.UrlEncode()}&subdirectory={subDirectory.UrlEncode()}";
@@ -45,7 +69,7 @@ public class BySoftApi : IBySoftApi
         }
     }
 
-    public async Task<string> GetUriFromPartNameAsync(string partName, string subDirectory)
+    public async Task<string?> GetUriFromPartNameAsync(string partName, string subDirectory)
     {
         //Example: http://localhost:56111/api/v1/Parts/GetPartUris?name=project-x
         // Response = array with strings (uri's)
@@ -67,18 +91,34 @@ public class BySoftApi : IBySoftApi
 
         var responseContent = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
         // There could be more than one part with the same name. But the sub directory is part
+        // we should take the urlEncoding into account, because special characters could be part
         // of the URI, so we filter on the sub directory.
-        var uri = responseContent.FirstOrDefault(r => r.Contains(subDirectory));
-        // if (uri == null)
-        // {
-        //     throw new ApplicationException($"Part name could not be retrieved. Part name: {partName}");
-        // }
 
+        _logger.LogDebug("SubDirectory: {SubDirectory}", subDirectory);
+        _logger.LogDebug("GetPartUris response: {Response}", responseContent);
+
+        if (responseContent is null)
+        {
+            throw new ApplicationException("BySoft getPartUris failed: response content is null");
+        }
+
+        var decodedSubDirectory = subDirectory.UrlDecode() ?? string.Empty;
+        var uri = responseContent.FirstOrDefault(boxUri =>
+        {
+            // the box uri contains a directory with a / and the subdirectory is a \ defined by Path.Combine.
+            // So we need to decode both and compare
+            var uri = boxUri.UrlDecode();
+            _logger.LogDebug("boxUri Decoded: {Uri}", uri);
+            // Normalize directory separators in the URI as well
+            // because the decoded subdirectory is defined with a \
+            // the boxfile location uses /
+            var normalizedUri = uri.Replace('/', '\\');
+            return normalizedUri.Contains(decodedSubDirectory, StringComparison.OrdinalIgnoreCase);
+        });
         return uri;
     }
 
-    public async Task UpdatePartAsync(string partUri, string materialName, string bendingMachineName, string cuttingMachineName,
-        double thickness, int? rotationAllowance)
+    public async Task UpdatePartAsync(string partUri, UpdatePartArgs args)
     {
         // Example call
         // http://localhost:56111/api/v1/Parts/Update?uri=box%3A%2F%2FParts%2FAPI%2Fmh-test%2Fproject-x%2398a5641f-efa2-44b1-a51f-11dbbdb440d8
@@ -91,34 +131,20 @@ public class BySoftApi : IBySoftApi
         //     "rotationAllowance": 1/5/10/30/45/90/180
         // }
 
-
         // We need to put the parameters in the URL, because we can't combine json content and query parameters in the content
         var url = $"{GetApiBasePath()}/Parts/Update?uri={partUri.UrlEncode()}";
-        var content = new UpdatePartInfo
-        {
-            MaterialName = materialName,
-            Thickness = thickness,
-            Priority = "1",
-            RotationAllowance = rotationAllowance
-        };
-
-        if (!string.IsNullOrWhiteSpace(bendingMachineName))
-        {
-            content.BendingMachineName = bendingMachineName;
-        }
-
-        if (!string.IsNullOrWhiteSpace(cuttingMachineName))
-        {
-            content.CuttingMachineName = cuttingMachineName;
-        }
-
-        _logger.LogDebug("UpdatePartAsync. with materialName: '{materialName}', bendingMachineName:'{bendingMachineName}', cuttingMachineName: '{cuttingMachineName}' Url: {Url}", materialName, bendingMachineName, cuttingMachineName, url);
-        var response = await _httpClient.PostAsJsonAsync(url, content);
+        _logger.LogDebug("UpdatePartAsync. {@Args}  Url: {Url}", args, url);
+        // Post the args as json content but null properties should not be included
+        var response = await _httpClient.PostAsJsonAsync(url, args, s_ignoreNullsJsonOptions);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft updatePart failed: {responseContentFailed}");
+        }
     }
 
-    public async Task<SetTechnologyResponse> SetBendingTechnologyAsync(string partUri)
+    public async Task<SetTechnologyResponse?> SetBendingTechnologyAsync(string partUri)
     {
         // Example call
         // http://localhost:56111/api/v1/Parts/SetBendingTechnology?uri=box%3A%2F%2FParts%2FAPI%2Fmh-test%2FBeugel%25204%23eab4070f-7329-43b4-9a2a-f74219beb60f&calculateDeduction=true&calculateBendingTime=false
@@ -139,13 +165,14 @@ public class BySoftApi : IBySoftApi
 
         var response = await _httpClient.PostAsync(requestUri, null);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
-
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft setBendingTechnology failed: {responseContentFailed}");
+        }
         var responseContent = await response.Content.ReadFromJsonAsync<SetTechnologyResponse>();
-        var responseForLog = JsonSerializer.Serialize(responseContent);
-        _logger.LogDebug("SetBendingTechnology response: {Log}", responseForLog);
-
-        return responseContent;
+        _logger.LogDebug("SetBendingTechnology response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException($"BySoft setBendingTechnology failed: {responseContent}");
     }
 
     public async Task SetCuttingTechnologyAsync(string partUri)
@@ -162,8 +189,12 @@ public class BySoftApi : IBySoftApi
         var response = await _httpClient.PostAsJsonAsync(requestUri, content);
 
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
-        // We do not check the response. We only set it.
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft setCuttingTechnology failed: {responseContentFailed}");
+        }
     }
 
     public async Task DeletePartAsync(string partUri)
@@ -176,23 +207,30 @@ public class BySoftApi : IBySoftApi
 
         var response = await _httpClient.PostAsync(requestUri, null);
         // Throws an error in not successful
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft deletePart failed: {responseContentFailed}");
+        }
     }
 
-    public async Task<CheckPartResponse> CheckPartAsync(string partUri)
+    public async Task<CheckPartResponse?> CheckPartAsync(string partUri)
     {
         var requestUri = $"{GetApiBasePath()}/Parts/CheckPart?uri={partUri.UrlEncode()}";
         _logger.LogDebug("Parts/CheckPart. Uri: {RequestUri}", requestUri);
 
         var response = await _httpClient.GetAsync(requestUri);
         // Throws an error if not successful
-        response.EnsureSuccessStatusCode();
+        // Throws an error in not successful
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentFailed = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException($"BySoft checkPart failed: {responseContentFailed}");
+        }
 
         var responseContent = await response.Content.ReadFromJsonAsync<CheckPartResponse>();
-        var responseForLog = JsonSerializer.Serialize(responseContent);
-        _logger.LogDebug("CheckPart response: {Log}", responseForLog);
-
-        return responseContent;
+        _logger.LogDebug("CheckPart response: {@ResponseContent}", responseContent);
+        return responseContent ?? throw new ApplicationException("BySoft checkPart failed: response content is null");
     }
 
     /// <summary>

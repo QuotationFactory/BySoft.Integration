@@ -2,6 +2,6 @@
 
 public class CheckPartDetails
 {
-    public string State { get; set; }
-    public string Description { get; set; }
+    public required string State { get; set; }
+    public required string Description { get; set; }
 }

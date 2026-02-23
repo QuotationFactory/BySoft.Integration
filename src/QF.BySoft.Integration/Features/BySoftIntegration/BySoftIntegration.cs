@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using QF.BySoft.Integration.Features.AgentOutputFile;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.Integration.Common.Serialization;
 using Versioned.ExternalDataContracts;
-using Versioned.ExternalDataContracts.Enums;
 using Constants = QF.BySoft.Entities.Constants;
 
 namespace QF.BySoft.Integration.Features.BySoftIntegration;
@@ -54,14 +52,13 @@ public class BySoftIntegration : IBySoftIntegration
 
     public async Task HandleManufacturabilityCheckRequestAsync(string jsonFilePath)
     {
-        RequestManufacturabilityCheckOfPartTypeMessage request = null;
+        RequestManufacturabilityCheckOfPartTypeMessage? request = null;
         try
         {
             if (jsonFilePath == null)
             {
                 throw new ArgumentNullException(nameof(jsonFilePath));
             }
-
 
             // check if json file exists, handle the request
             if (!File.Exists(jsonFilePath))
@@ -85,54 +82,37 @@ public class BySoftIntegration : IBySoftIntegration
                 throw new ApplicationException("Deserializing request failed");
             }
 
-            var stepDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.AgentIntegrationName);
-            // The name of the step-file depends on the app setting SavePartWithCombinedFileName
-            // If false: Step file name will have the same name as the part-id , with the extension .step
-            // If true : Step file name will be partId_partName , with the extension .step
-            var stepName = _bySoftIntegrationSettings.SavePartWithCombinedFileName
-                ? $"{request.PartType.Id.ToString()}_{request.PartType.Name}"
-                : request.PartType.Id.ToString();
-            var stepFilePathName = Path.Combine(stepDownloadDirectory, $"{stepName}.step");
+            var geometryDownloadDirectory = _bySoftIntegrationSettings.GetStepDownloadDirectory(Constants.IntegrationName);
+            var geometryFilePathName = Path.Combine(geometryDownloadDirectory, Path.GetRandomFileName());
 
-            // Download the step file sync
-            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, stepFilePathName);
-            _logger.LogInformation("Downloaded step file: {StepFilePathName}", stepFilePathName);
+            // Download the Geometry file from the provided URI
+            await DownloadFileAsync(request.StepFileUrl.AbsoluteUri, geometryFilePathName);
+            _logger.LogInformation("Downloaded step file: {StepFilePathName}", geometryFilePathName);
 
-            // Do manufacturability check with BySoft CAM API
-            var containsBending = request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
-            var result = containsBending
-                ? await _bySoftApi.ManufacturabilityCheckBendingAsync(request, stepFilePathName)
-                : await _bySoftApi.ManufacturabilityCheckCuttingAsync(request, stepFilePathName);
+            // Call BySoft API to do manufacturability check
+            var result = await _bySoftApi.ManufacturabilityCheckAsync(request, geometryFilePathName);
 
-            if (result != null)
-            {
-                var responseJson = _agentMessageSerializationHelper.ToJson(result);
+            var responseJson = _agentMessageSerializationHelper.ToJson(result);
 
-                var fileName = $"{result.PartTypeId.ToString()}.json";
-                // get temp file path
-                var tempFile = Path.Combine(Path.GetTempPath(), fileName);
-                // We save the json first to the temp directory and then copy it to the Agent Input direcotry.
-                // Saving directly into the agent triggers somethings the filewatcher before all is completely saved.
-                // And thus loosing the response.
-                await File.WriteAllTextAsync(tempFile, responseJson);
+            var fileName = $"{result.PartTypeId.ToString()}.json";
+            // get temp file path
+            var tempFile = Path.Combine(Path.GetTempPath(), fileName);
+            // We save the json first to the temp directory and then copy it to the Agent Input direcotry.
+            // Saving directly into the agent triggers somethings the filewatcher before all is completely saved.
+            // And thus loosing the response.
+            await File.WriteAllTextAsync(tempFile, responseJson);
 
-                // Move the result file in the Agent/Integration/Input folder
-                _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.AgentIntegrationName, tempFile);
+            // Move the result file in the Agent/Integration/Input folder
+            _bySoftIntegrationSettings.MoveFileToAgentInput(Constants.IntegrationName, tempFile);
 
-                _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
-                _bySoftIntegrationSettings.MoveFileToProcessed(Constants.AgentIntegrationName, jsonFilePath);
+            _logger.LogInformation("Response send. Response file: {ResponseFileName}", fileName);
+            _bySoftIntegrationSettings.MoveFileToProcessed(Constants.IntegrationName, jsonFilePath);
 #if DEBUG
-                // Save in InputSend folder, for debugging
-                var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.AgentIntegrationName);
-                var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
-                await File.WriteAllTextAsync(responseFileHistory, responseJson);
+            // Save in InputSend folder, for debugging
+            var agentInputHistoryFolder = _bySoftIntegrationSettings.GetInputSendDirectory(Constants.IntegrationName);
+            var responseFileHistory = Path.Combine(agentInputHistoryFolder, fileName);
+            await File.WriteAllTextAsync(responseFileHistory, responseJson);
 #endif
-            }
-            else
-            {
-                _logger.LogWarning("Did not receive a valid result, could not return result");
-                _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
-            }
 
             _logger.LogInformation("Finished processing file: {JsonFilePath}", jsonFilePath);
         }
@@ -140,8 +120,11 @@ public class BySoftIntegration : IBySoftIntegration
         {
             _logger.LogError(ex, "Error processing file: {JsonFilePath}", jsonFilePath);
             // Do not move the file, but copy, see remark above
-            _bySoftIntegrationSettings.MoveFileToError(Constants.AgentIntegrationName, jsonFilePath);
-            ReportException(ex, request);
+            if (jsonFilePath != null)
+            {
+                _bySoftIntegrationSettings.MoveFileToError(Constants.IntegrationName, jsonFilePath);
+                ReportException(ex, request);
+            }
         }
     }
 
@@ -168,31 +151,32 @@ public class BySoftIntegration : IBySoftIntegration
         }
     }
 
-    private void ReportException(Exception ex, RequestManufacturabilityCheckOfPartTypeMessage request)
+    private void ReportException(Exception ex, RequestManufacturabilityCheckOfPartTypeMessage? request)
     {
         if (request == null)
         {
             return;
         }
 
-        var response = new RequestManufacturabilityCheckOfPartTypeMessageResponse();
-        response.ProjectId = request.ProjectId;
-        response.PartTypeId = request.PartType.Id;
-        response.IsManufacturable = false;
+        var response = new RequestManufacturabilityCheckOfPartTypeMessageResponse
+        {
+            ProjectId = request.ProjectId,
+            PartTypeId = request.PartType.Id,
+            IsManufacturable = false
+        };
         var logs = new List<EventLog>
         {
             new()
             {
                 DateTime = DateTime.UtcNow,
-                Message = $"Error. {ex.Message}",
+                Message = $"Error. {ex.Message} {ex.InnerException}",
                 Level = EventLogLevel.Error,
                 ProjectId = request.ProjectId,
                 PartTypeId = request.PartType.Id
             }
         };
         response.EventLogs = logs;
-        var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.AgentIntegrationName, true);
-        // Save the result file in the Agent/CADMAN-B/Input folder
+        var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.IntegrationName, true);
         var fileName = $"{response.PartTypeId.ToString()}.json";
         var responseFile = Path.Combine(agentUploadFolder, fileName);
         File.WriteAllText(responseFile, JsonConvert.SerializeObject(response));

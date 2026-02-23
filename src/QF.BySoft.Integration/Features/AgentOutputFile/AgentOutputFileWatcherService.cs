@@ -29,7 +29,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
 
         // add file watcher to the agent output directory
         var bySoftIntegrationSettings = options.Value;
-        var directory = bySoftIntegrationSettings.GetOrCreateAgentOutputDirectory(Constants.AgentIntegrationName, true);
+        var directory = bySoftIntegrationSettings.GetOrCreateAgentOutputDirectory(Constants.IntegrationName, true);
         if (bySoftIntegrationSettings.NumberOfConcurrentTasks > 1)
         {
             _semaphore = new(bySoftIntegrationSettings.NumberOfConcurrentTasks, bySoftIntegrationSettings.NumberOfConcurrentTasks);

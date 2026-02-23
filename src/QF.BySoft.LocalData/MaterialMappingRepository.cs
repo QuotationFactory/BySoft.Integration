@@ -54,16 +54,16 @@ public class MaterialMappingRepository : IMaterialMappingRepository
         var worksheet = workbook.Worksheets.FirstOrDefault();
 
         // select range with used data in the sheet
-        var rangeUsed = worksheet.RangeUsed();
+        var rangeUsed = worksheet!.RangeUsed();
 
         // first column has the Material id's
-        var column1 = rangeUsed.Column(1);
+        var column1 = rangeUsed!.Column(1);
         // search for the
         var foundCells = column1.Search(materialId, CompareOptions.OrdinalIgnoreCase);
         if (foundCells != null && foundCells.Any())
         {
             var firstCell = foundCells.FirstOrDefault();
-            var rowNumber = firstCell.Address.RowNumber;
+            var rowNumber = firstCell!.Address.RowNumber;
             // get the integration Material id
             var column2 = rangeUsed.Column(2);
             return column2.Cell(rowNumber).Value.ToString();
@@ -91,14 +91,14 @@ public class MaterialMappingRepository : IMaterialMappingRepository
         var worksheet = workbook.Worksheets.FirstOrDefault();
 
         // select range with used data in the sheet
-        var rangeUsed = worksheet.RangeUsed();
+        var rangeUsed = worksheet!.RangeUsed();
 
         var colMaterialGroup = 1;
         var colKeyword = 2;
         var bySoftCamMaterialCode = 3;
 
         // Get all rows where all 3 cells have a value
-        var mappingRows = rangeUsed.AsTable().DataRange.Rows()
+        var mappingRows = rangeUsed!.AsTable().DataRange.Rows()
             .Where(row => row.Cell(colMaterialGroup).GetString().Trim().Length > 0
                           && row.Cell(colKeyword).GetString().Trim().Length > 0
                           && row.Cell(bySoftCamMaterialCode).GetString().Trim().Length > 0);
