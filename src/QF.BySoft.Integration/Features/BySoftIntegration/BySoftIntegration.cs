@@ -164,18 +164,37 @@ public class BySoftIntegration : IBySoftIntegration
             PartTypeId = request.PartType.Id,
             IsManufacturable = false
         };
-        var logs = new List<EventLog>
+
+        // Check if the exception is a HttpRequestException with an inner SocketException with ConnectionRefused,
+        // which indicates that the BySoft API is not reachable, and runs.
+        if (ex is HttpRequestException { InnerException: System.Net.Sockets.SocketException { SocketErrorCode: System.Net.Sockets.SocketError.ConnectionRefused } })
         {
-            new()
-            {
-                DateTime = DateTime.UtcNow,
-                Message = $"Error. {ex.Message} {ex.InnerException}",
-                Level = EventLogLevel.Error,
-                ProjectId = request.ProjectId,
-                PartTypeId = request.PartType.Id
-            }
-        };
-        response.EventLogs = logs;
+            response.EventLogs =
+            [
+                new EventLog
+                {
+                    DateTime = DateTime.UtcNow,
+                    Message = "The Connection to BySoft Api is not possible, Check if the BySoft Cam API application runs",
+                    Level = EventLogLevel.Error,
+                    ProjectId = request.ProjectId,
+                    PartTypeId = request.PartType.Id
+                }
+            ];
+        }
+        else
+        {
+            response.EventLogs =
+            [
+                new EventLog
+                {
+                    DateTime = DateTime.UtcNow,
+                    Message = $"Error. {ex.Message} {ex.InnerException}",
+                    Level = EventLogLevel.Error,
+                    ProjectId = request.ProjectId,
+                    PartTypeId = request.PartType.Id
+                }
+            ];
+        }
         var agentUploadFolder = _bySoftIntegrationSettings.GetOrCreateAgentInputDirectory(Constants.IntegrationName, true);
         var fileName = $"{response.PartTypeId.ToString()}.json";
         var responseFile = Path.Combine(agentUploadFolder, fileName);
