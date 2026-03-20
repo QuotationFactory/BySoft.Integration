@@ -174,7 +174,7 @@ public class BySoftIntegration : IBySoftIntegration
                 new EventLog
                 {
                     DateTime = DateTime.UtcNow,
-                    Message = "The Connection to BySoft Api is not possible, Check if the BySoft Cam API application runs",
+                    Message = "Unable to connect to the BySoft API. Verify that the BySoft CAM API application is running.",
                     Level = EventLogLevel.Error,
                     ProjectId = request.ProjectId,
                     PartTypeId = request.PartType.Id
