@@ -166,7 +166,7 @@ public class BySoftIntegration : IBySoftIntegration
         };
 
         // Check if the exception is a HttpRequestException with an inner SocketException with ConnectionRefused,
-        // which indicates that the BySoft API is not reachable, and runs.
+        // which indicates that the BySoft API is either not reachable or not running.
         if (ex is HttpRequestException { InnerException: System.Net.Sockets.SocketException { SocketErrorCode: System.Net.Sockets.SocketError.ConnectionRefused } })
         {
             response.EventLogs =
