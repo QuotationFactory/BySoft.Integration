@@ -57,7 +57,7 @@ public static class Program
                 // register agent message serialization helper
                 services.AddTransient<IAgentMessageSerializationHelper, ExternalAgentMessageSerializationHelper>();
 
-                services.AddTransient<IMachineMappingRepository, MachineMappingRepository>();
+                services.AddTransient<IResourceMappingRepository, ResourceMappingRepository>();
                 services.AddTransient<IMaterialMappingRepository, MaterialMappingRepository>();
                 services.AddTransient<IBySoftManufacturabilityCheck, BySoftManufacturabilityCheck>();
                 services.AddHttpClient<IBySoftIntegration, BySoftIntegration>();

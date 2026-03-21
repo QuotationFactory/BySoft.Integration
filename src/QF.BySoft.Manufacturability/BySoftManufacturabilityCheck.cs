@@ -28,20 +28,20 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 
     private readonly BySoftIntegrationSettings _bySoftIntegrationSettings;
     private readonly ILogger<BySoftManufacturabilityCheck> _logger;
-    private readonly IMachineMappingRepository _machineMappingRepository;
+    private readonly IResourceMappingRepository _resourceMappingRepository;
     private readonly IMaterialMappingRepository _materialMappingRepository;
     private readonly string[] _warningsAsErrors;
 
     public BySoftManufacturabilityCheck(
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
-        IMachineMappingRepository machineMappingRepository,
+        IResourceMappingRepository resourceMappingRepository,
         IMaterialMappingRepository materialMappingRepository,
         ILogger<BySoftManufacturabilityCheck> logger,
         IBySoftApi bySoftApi
     )
     {
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
-        _machineMappingRepository = machineMappingRepository;
+        _resourceMappingRepository = resourceMappingRepository;
         _materialMappingRepository = materialMappingRepository;
         _logger = logger;
         _bySoftApi = bySoftApi;
@@ -508,7 +508,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                 $"No bending machine found in request of project-id: {request.ProjectId}, part-id: {request.PartType.Id}");
         }
 
-        var bendingMachineName = _machineMappingRepository.GetBySoftMachineId(resourceId);
+        var bendingMachineName = _resourceMappingRepository.GetBySoftMachineName(resourceId);
 
         if (string.IsNullOrWhiteSpace(bendingMachineName))
         {
@@ -534,7 +534,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
                 $"No sheetCutting machine found in request of project-id: {request.ProjectId}, part-id: {request.PartType.Id}");
         }
 
-        var cuttingMachineName = _machineMappingRepository.GetBySoftMachineId(resourceId);
+        var cuttingMachineName = _resourceMappingRepository.GetBySoftMachineName(resourceId);
 
         if (string.IsNullOrWhiteSpace(cuttingMachineName))
         {

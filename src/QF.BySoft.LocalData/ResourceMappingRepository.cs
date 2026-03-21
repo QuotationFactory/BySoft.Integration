@@ -8,11 +8,11 @@ using QF.BySoft.LocalData.Helpers;
 
 namespace QF.BySoft.LocalData;
 
-public class MachineMappingRepository : IMachineMappingRepository
+public class ResourceMappingRepository : IResourceMappingRepository
 {
     private readonly string _applicationBasePath = ApplicationInfo.GetApplicationBasePath();
 
-    public string GetBySoftMachineId(string resourceId)
+    public string GetBySoftMachineName(string resourceId)
     {
         if (string.IsNullOrWhiteSpace(resourceId))
         {
@@ -51,8 +51,8 @@ public class MachineMappingRepository : IMachineMappingRepository
             var rowNumber = firstCell!.Address.RowNumber;
             // get the BySoft machine id
             var column2 = rangeUsed.Column(2);
-            var machineId = column2.Cell(rowNumber).Value.ToString();
-            return machineId;
+            var machineName = column2.Cell(rowNumber).Value.ToString();
+            return machineName;
         }
 
         return string.Empty;
