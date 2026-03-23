@@ -30,12 +30,14 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     private readonly ILogger<BySoftManufacturabilityCheck> _logger;
     private readonly IResourceMappingRepository _resourceMappingRepository;
     private readonly IMaterialMappingRepository _materialMappingRepository;
+    private readonly IWorkingStepResourceMappingRepository _workingStepResourceMappingRepository;
     private readonly string[] _warningsAsErrors;
 
     public BySoftManufacturabilityCheck(
         IOptions<BySoftIntegrationSettings> bySoftIntegrationSettings,
         IResourceMappingRepository resourceMappingRepository,
         IMaterialMappingRepository materialMappingRepository,
+        IWorkingStepResourceMappingRepository workingStepResourceMappingRepository,
         ILogger<BySoftManufacturabilityCheck> logger,
         IBySoftApi bySoftApi
     )
@@ -43,6 +45,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _bySoftIntegrationSettings = bySoftIntegrationSettings.Value;
         _resourceMappingRepository = resourceMappingRepository;
         _materialMappingRepository = materialMappingRepository;
+        _workingStepResourceMappingRepository = workingStepResourceMappingRepository;
         _logger = logger;
         _bySoftApi = bySoftApi;
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
@@ -218,7 +221,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
         else
         {
-            inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension);
+            inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension, _workingStepResourceMappingRepository);
         }
 
         var movedFilePath = Path.GetDirectoryName(geometryFileInputPath);
@@ -249,7 +252,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var description = _bySoftIntegrationSettings.DefaultDescriptionFieldFormat;
-        description = Replacer(description, request);
+        description = Replacer(description, request, _workingStepResourceMappingRepository);
         return description;
     }
 
@@ -261,7 +264,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var info1 = _bySoftIntegrationSettings.DefaultInfo1FieldFormat;
-        info1 = Replacer(info1, request);
+        info1 = Replacer(info1, request, _workingStepResourceMappingRepository);
         return info1;
     }
 
@@ -273,46 +276,11 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var info2 = _bySoftIntegrationSettings.DefaultInfo2FieldFormat;
-        info2 = Replacer(info2, request);
+        info2 = Replacer(info2, request, _workingStepResourceMappingRepository);
         return info2;
     }
 
-    /// <summary>
-    /// Beitsen passiveren 	Beits [Done]
-    /// boren 				Boor  [Done]
-    /// draadtappen			Tap    [Done]
-    /// slijpen				Slijp [Done]
-    /// lassen				MIG
-    ///                     TIG
-    /// ontbramen			TS [Done]
-    /// plaat kanten		Zet [Done]
-    /// popnagelen			Pop [Done]
-    /// souvereinen			Souv [Done]
-    /// trommelen			Trommel [Done]
-    /// walsen				Wals [Done]
-    /// zagen				Zaag [Done]
-    /// zandstralen			Gestr. [Done]
-    /// Afschuinen (kantje frezen)	Afsch. [Done]
-    /// </summary>
-    private static readonly IReadOnlyDictionary<WorkingStepTypeV1,string> s_temporarillyMapper = new Dictionary<WorkingStepTypeV1, string>
-    {
-        { WorkingStepTypeV1.SheetBending,"Zet"},
-        { WorkingStepTypeV1.Drilling,"Boor"},
-        { WorkingStepTypeV1.ThreadTapping,"Tap"},
-        { WorkingStepTypeV1.BoltPressing, "Snij"},
-        { WorkingStepTypeV1.Deburring,"TS"},
-        { WorkingStepTypeV1.CounterSinking,"Souv"},
-        { WorkingStepTypeV1.Sawing,"Zaag"},
-        { WorkingStepTypeV1.EdgeMilling,"Afsch."},
-        { WorkingStepTypeV1.Riveting,"Pop"},
-        { WorkingStepTypeV1.Rolling,"Wals"},
-        { WorkingStepTypeV1.VibratoryDeburring, "Trommel"},
-        { WorkingStepTypeV1.PicklingPassivating, "Beits"},
-        { WorkingStepTypeV1.WeldGrinding ,"Slijp"},
-        { WorkingStepTypeV1.SandBlasting,"Gestr." }
-    };
-
-    private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request)
+    private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request, IWorkingStepResourceMappingRepository  workingStepResourceMapping)
     {
         input = input.Replace("{BuyingPartyName}", request.BuyingPartyName);
         input = input.Replace("{BuyingPartyCode}", request.BuyingPartyCode);
@@ -331,8 +299,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         var sb = new StringBuilder();
         foreach (var boMItemActivity in request.PartType.Activities)
         {
-
-            if(s_temporarillyMapper.TryGetValue(boMItemActivity.WorkingStepType, out var mappedValue))
+            if(workingStepResourceMapping.GetCustomWorkingStepCode(boMItemActivity.WorkingStepType.ToString(), boMItemActivity.Resource?.ResourceId.ToString() ?? string.Empty) is { } mappedValue && !string.IsNullOrWhiteSpace(mappedValue))
             {
                 sb.Append($"{mappedValue}+");
             }
@@ -341,7 +308,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return input.Replace("{BoMItemActivityCustomName}", sb.ToString().TrimEnd('+'));
     }
 
-    private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension)
+    private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension, IWorkingStepResourceMappingRepository  workingStepResourceMapping)
     {
         // The name of the step-file depends on the app setting SavePartWithCombinedFileName
         // If false: Step file name will have the same name as the part-id , with the extension .step
@@ -364,7 +331,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         resultGeometryName = resultGeometryName.Replace("{PartNameWithoutExtension}", partNameWithoutExtension);
 
         // here we replace the other variables except
-        geometryName = Replacer(resultGeometryName, request);
+        geometryName = Replacer(resultGeometryName, request, workingStepResourceMapping);
         return geometryName;
     }
 

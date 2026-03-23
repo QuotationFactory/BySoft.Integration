@@ -64,14 +64,16 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
         var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -99,14 +101,16 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -138,14 +142,16 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -171,14 +177,17 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
+
         var bySoftApiMock = new Mock<IBySoftApi>();
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -204,14 +213,16 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
         var bySoftApiMock = new Mock<IBySoftApi>();
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -237,14 +248,17 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var resourceRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var resourceRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
+
         var bySoftApiMock = new Mock<IBySoftApi>();
 
         var sut = new BySoftManufacturabilityCheck(
             integrationSettingsMock.Object,
             resourceRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -275,8 +289,10 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
+
         // Overwrite the BendingTech
         var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
@@ -284,6 +300,7 @@ public class BySoftManufacturabilityCheckTests
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -314,8 +331,9 @@ public class BySoftManufacturabilityCheckTests
 
         // Mocks
         var integrationSettingsMock = IntegrationSettingsMock(bySoftIntegrationSettings);
-        var machineRepositoryMock = ResourceRepositoryMock(_machineIntegration);
-        var materialRepositoryMock = MaterialRepositoryMock(_materialIntegration);
+        var machineRepositoryMock = ResourceMappingRepositoryMock(_machineIntegration);
+        var materialRepositoryMock = MaterialMappingRepositoryMock(_materialIntegration);
+        var workingStepResourceMapping = WorkingStepResourceMappingRepositoryMock(_machineIntegration);
 
         var bySoftApiMock = BySoftApiMock(StepFilePathName, DefaultSubDirectory, _partNameResult, _bendingResponse);
 
@@ -323,6 +341,7 @@ public class BySoftManufacturabilityCheckTests
             integrationSettingsMock.Object,
             machineRepositoryMock.Object,
             materialRepositoryMock.Object,
+            workingStepResourceMapping.Object,
             _mockLogger.Object,
             bySoftApiMock.Object
         );
@@ -358,7 +377,7 @@ public class BySoftManufacturabilityCheckTests
         return request;
     }
 
-    private static Mock<IResourceMappingRepository> ResourceRepositoryMock(string machineIntegration)
+    private static Mock<IResourceMappingRepository> ResourceMappingRepositoryMock(string machineIntegration)
     {
         var machineRepositoryMock = new Mock<IResourceMappingRepository>();
         machineRepositoryMock
@@ -366,8 +385,16 @@ public class BySoftManufacturabilityCheckTests
             .Returns(machineIntegration);
         return machineRepositoryMock;
     }
+    private static Mock<IWorkingStepResourceMappingRepository> WorkingStepResourceMappingRepositoryMock(string machineIntegration)
+    {
+        var machineRepositoryMock = new Mock<IWorkingStepResourceMappingRepository>();
+        machineRepositoryMock
+            .Setup(x => x.GetCustomWorkingStepCode( It.IsAny<string>() ,It.IsAny<string>()))
+            .Returns(machineIntegration);
+        return machineRepositoryMock;
+    }
 
-    private static Mock<IMaterialMappingRepository> MaterialRepositoryMock(string materialIntegration)
+    private static Mock<IMaterialMappingRepository> MaterialMappingRepositoryMock(string materialIntegration)
     {
         var materialRepositoryMock = new Mock<IMaterialMappingRepository>();
         materialRepositoryMock
