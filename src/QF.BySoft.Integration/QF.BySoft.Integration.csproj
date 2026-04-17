@@ -35,12 +35,28 @@
     <None Update="appsettings.Development.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\MachineMapping.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\MaterialMapping.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\MaterialMapping_example_Article.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\MaterialMapping_example_Keywords.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\QF.BySoft.Manufacturability\QF.BySoft.Manufacturability.csproj" />
     <ProjectReference Include="..\QF.BySoft.LocalData\QF.BySoft.LocalData.csproj" />
     <ProjectReference Include="..\QF.Integration.Common\QF.Integration.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>
