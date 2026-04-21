@@ -60,6 +60,7 @@ public static class Program
                 services.AddTransient<IResourceMappingRepository, ResourceMappingRepository>();
                 services.AddTransient<IMaterialMappingRepository, MaterialMappingRepository>();
                 services.AddTransient<IWorkingStepResourceMappingRepository, WorkingStepResourceMappingRepository>();
+                services.AddTransient<IFeaturesMappingRepository, FeaturesMappingRepository>();
                 services.AddTransient<IBySoftManufacturabilityCheck, BySoftManufacturabilityCheck>();
                 services.AddHttpClient<IBySoftIntegration, BySoftIntegration>();
                 services.AddHttpClient<IBySoftApi, BySoftApi>();
