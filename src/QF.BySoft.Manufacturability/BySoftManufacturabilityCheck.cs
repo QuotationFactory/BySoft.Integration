@@ -12,6 +12,7 @@ using QF.BySoft.Entities.Repositories;
 using QF.BySoft.Manufacturability.Interfaces;
 using QF.BySoft.Manufacturability.Models;
 using Versioned.ExternalDataContracts.Contracts.BoM;
+using Versioned.ExternalDataContracts.Contracts.Features;
 using Versioned.ExternalDataContracts.Enums;
 
 namespace QF.BySoft.Manufacturability;
@@ -31,6 +32,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
     private readonly IResourceMappingRepository _resourceMappingRepository;
     private readonly IMaterialMappingRepository _materialMappingRepository;
     private readonly IWorkingStepResourceMappingRepository _workingStepResourceMappingRepository;
+    private readonly IFeaturesMappingRepository _featuresMappingRepository;
     private readonly string[] _warningsAsErrors;
 
     public BySoftManufacturabilityCheck(
@@ -38,6 +40,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         IResourceMappingRepository resourceMappingRepository,
         IMaterialMappingRepository materialMappingRepository,
         IWorkingStepResourceMappingRepository workingStepResourceMappingRepository,
+        IFeaturesMappingRepository featuresMappingRepository,
         ILogger<BySoftManufacturabilityCheck> logger,
         IBySoftApi bySoftApi
     )
@@ -46,6 +49,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         _resourceMappingRepository = resourceMappingRepository;
         _materialMappingRepository = materialMappingRepository;
         _workingStepResourceMappingRepository = workingStepResourceMappingRepository;
+        _featuresMappingRepository = featuresMappingRepository;
         _logger = logger;
         _bySoftApi = bySoftApi;
         _warningsAsErrors = _bySoftIntegrationSettings.WarningsAsErrors.ToHashSet(StringComparer.OrdinalIgnoreCase).ToArray();
@@ -221,7 +225,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
         else
         {
-            inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension, _workingStepResourceMappingRepository);
+            inputFileName = GeometryNameReplacer(_bySoftIntegrationSettings.DefaultGeometryFileNameFormat, request, originalFileNameExtension, _workingStepResourceMappingRepository, _featuresMappingRepository);
         }
 
         var movedFilePath = Path.GetDirectoryName(geometryFileInputPath);
@@ -252,7 +256,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var description = _bySoftIntegrationSettings.DefaultDescriptionFieldFormat;
-        description = Replacer(description, request, _workingStepResourceMappingRepository);
+        description = Replacer(description, request, _workingStepResourceMappingRepository, _featuresMappingRepository);
         return description;
     }
 
@@ -264,7 +268,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var info1 = _bySoftIntegrationSettings.DefaultInfo1FieldFormat;
-        info1 = Replacer(info1, request, _workingStepResourceMappingRepository);
+        info1 = Replacer(info1, request, _workingStepResourceMappingRepository, _featuresMappingRepository);
         return info1;
     }
 
@@ -276,11 +280,11 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         }
 
         var info2 = _bySoftIntegrationSettings.DefaultInfo2FieldFormat;
-        info2 = Replacer(info2, request, _workingStepResourceMappingRepository);
+        info2 = Replacer(info2, request, _workingStepResourceMappingRepository, _featuresMappingRepository);
         return info2;
     }
 
-    private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request, IWorkingStepResourceMappingRepository  workingStepResourceMapping)
+    private static string Replacer(string input, RequestManufacturabilityCheckOfPartTypeMessage request, IWorkingStepResourceMappingRepository  workingStepResourceMapping, IFeaturesMappingRepository featuresMappingRepository)
     {
         input = input.Replace("{BuyingPartyName}", request.BuyingPartyName);
         input = input.Replace("{BuyingPartyCode}", request.BuyingPartyCode);
@@ -299,16 +303,46 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         var sb = new StringBuilder();
         foreach (var boMItemActivity in request.PartType.Activities)
         {
+            var featureTxt = string.Empty;
+            if (boMItemActivity.WorkingStepType == WorkingStepTypeV1.Deburring)
+            {
+                var featMappingString = CreateFeatMappingString<DeburringV1>(request.PartType.Features.Deburring);
+                featureTxt = featuresMappingRepository.GetCustomFeatureDescription(featMappingString);
+            }
+
             if(workingStepResourceMapping.GetCustomWorkingStepCode(boMItemActivity.WorkingStepType.ToString(), boMItemActivity.Resource?.ResourceId.ToString() ?? string.Empty) is { } mappedValue && !string.IsNullOrWhiteSpace(mappedValue))
             {
-                sb.Append($"{mappedValue}+");
+                sb.Append($"{mappedValue}{featureTxt}+");
             }
 
         }
         return input.Replace("{BoMItemActivityCustomName}", sb.ToString().TrimEnd('+'));
     }
 
-    private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension, IWorkingStepResourceMappingRepository  workingStepResourceMapping)
+    private static string CreateFeatMappingString<T>(object? feature)
+    {
+        if (feature == null)
+        {
+            return string.Empty;
+        }
+
+        var typeName = typeof(T).Name;
+        var sb = new StringBuilder();
+        var properties = typeof(T).GetProperties();
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(feature);
+            if (value == null)
+            {
+                continue;
+            }
+            sb.Append($"[{typeName}].[{property.Name}].[{value}]");
+        }
+
+        return sb.ToString();
+    }
+
+    private static string GeometryNameReplacer(string geometryName, RequestManufacturabilityCheckOfPartTypeMessage request, string originalFileNameExtension, IWorkingStepResourceMappingRepository  workingStepResourceMapping, IFeaturesMappingRepository featuresMappingRepository)
     {
         // The name of the step-file depends on the app setting SavePartWithCombinedFileName
         // If false: Step file name will have the same name as the part-id , with the extension .step
@@ -331,7 +365,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         resultGeometryName = resultGeometryName.Replace("{PartNameWithoutExtension}", partNameWithoutExtension);
 
         // here we replace the other variables except
-        geometryName = Replacer(resultGeometryName, request, workingStepResourceMapping);
+        geometryName = Replacer(resultGeometryName, request, workingStepResourceMapping, featuresMappingRepository);
         return geometryName;
     }
 
