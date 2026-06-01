@@ -1,0 +1,6483 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "BySoft CAM API - using object URIs",
+    "description": "A set of services to provide CAM functionality to external system.  \nPowered by **BySoft CAM 2026 6.0.1**",
+    "contact": {
+      "name": "Bystronic"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/BendJobs/GetBendJobUris": {
+      "get": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Gets BendJobs uris by job name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Info": {
+      "get": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Gets bending job information.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "description": "Uri of a bending job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.BendJobs.IBendJobInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.BendJobs.IBendJobInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.BendJobs.IBendJobInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Create": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Creates a new bending job.",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreateBendJobInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreateBendJobInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreateBendJobInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreateBendJobInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Open": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Opens a bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "description": "Uri of a bending job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Close": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Closes a bendJob if it is unmodified.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "description": "Uri of a bending job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Update": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Updates an existing bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Rename": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Renames a bending job.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Delete": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Deletes a bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "description": "Uri of the bending job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/AddBendPart": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Adds a bending part to an existing bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddBendJobPartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddBendJobPartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddBendJobPartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddBendJobPartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/RemoveBendPart": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Removes a bending part from an existing bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.RemoveBendJobPartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.RemoveBendJobPartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.RemoveBendJobPartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.RemoveBendJobPartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/UpdateBendPart": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Updates a bending part from an existing bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobPartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobPartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobPartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdateBendJobPartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/AddJobToMachine": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Add a bending job to a machine.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/RemoveJobFromMachine": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Removes a bending job from a machine.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/BendJobs/Optimize": {
+      "post": {
+        "tags": [
+          "BendJobs"
+        ],
+        "summary": "Run optimization process on a bending job.",
+        "parameters": [
+          {
+            "name": "bendJobUri",
+            "in": "query",
+            "description": "Uri of the bending job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetCuttingMachineUris": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets CuttingMachine uris by machine name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a machine",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetCuttingMachineInfo": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets cutting machine information.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a cutting machine",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ICuttingMachineInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ICuttingMachineInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ICuttingMachineInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetAllCuttingMachineUris": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets a list with all cutting machine URIs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetBendingMachineUris": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets BendingMachine uris by machine name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a machine",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetBendingMachineInfo": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets bending machine information.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a cutting machine",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IBendingMachineInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IBendingMachineInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IBendingMachineInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Machines/GetAllBendingMachineUris": {
+      "get": {
+        "tags": [
+          "Machines"
+        ],
+        "summary": "Gets a list with all bending machine URIs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Materials/GetMaterialUris": {
+      "get": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Gets Material uris by material name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Materials/GetMaterialInfo": {
+      "get": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Gets material information.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a material",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IMaterialInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IMaterialInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IMaterialInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Materials/GetAllMaterialUris": {
+      "get": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Gets a list with all material URIs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/GetPartJobUris": {
+      "get": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Gets PartJob uris by job name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a part job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Info": {
+      "get": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Gets partJobs information.",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "description": "Uri of a part job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/CheckPartJob": {
+      "get": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Gets partjob validation details.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a job",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobValidationInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobValidationInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartJobValidationInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Image": {
+      "get": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Gets the partjob image as PNG.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a job",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sizeX",
+            "in": "query",
+            "description": "Size x",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sizeY",
+            "in": "query",
+            "description": "Size y",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "planReferenceId",
+            "in": "query",
+            "description": "ReferenceId of the plan (optional)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Create": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Creates a new partJob",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/CreateSemiFinishedFromPart": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Creates a new partJob",
+        "parameters": [
+          {
+            "name": "guid",
+            "in": "query",
+            "description": "GUID of the part",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name for the job",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subdirectory",
+            "in": "query",
+            "description": "Saves the job in this subdirectory",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Open": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Opens a partJob.",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "description": "Uri of a partJob",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Close": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Closes a partJob if it is unmodified.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a partJob",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Update": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Updates an existing partJob",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartJobInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartJobInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartJobInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartJobInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Rename": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Renames a partJob.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/AddNestPart": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Add a NestPart to  an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestPartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestPartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestPartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestPartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/RemoveNestPart": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Removes a NestPart from an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/UpdateNestPart": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Updates a NestPart from an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newQuantity",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/AddNestSheet": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Add a NestSheet to  an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestSheetInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestSheetInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestSheetInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestSheetInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/RemoveNestSheet": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Removes a NestSheet from an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sheetReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/UpdateNestSheet": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Updates a NestSheet from an existing job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sheetReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newQuantity",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/Delete": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Delete a job",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/CalaculatePlanCutTime": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Calculates the cuttingTime for an existing cuttingPlan",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "number",
+                  "format": "double"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/AddPlanToMachine": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Add a plan to the joblist of a machine",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/AddAllPlansToMachine": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Add all plans to the joblist of a machine",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/RemovePlanFromMachine": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Remove a plan from the joblist of a machine",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planReferenceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "machineName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/RemovePlans": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Removes plans from a part job.",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planReferenceIds",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/PartJobs/ExportToDxf": {
+      "post": {
+        "tags": [
+          "PartJobs"
+        ],
+        "summary": "Exports plans to DXF",
+        "parameters": [
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "description": "Uri of a part job",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Output directory path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/GetPartUris": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Gets parts uris by part name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Info": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Gets part information.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/CheckPart": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Gets part validation details.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartValidationInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartValidationInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartValidationInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Open": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Opens a part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Close": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Closes a part if it is unmodified.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/OpenWithStartPage": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Opens a part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startingPage",
+            "in": "query",
+            "description": "Starting page to open Part with",
+            "schema": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.PartEditor.Helper.PartEditorContext"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/New": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Add new part information.",
+        "parameters": [
+          {
+            "name": "newPartType",
+            "in": "query",
+            "description": "Type of new Part",
+            "schema": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.NewPartModule"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Create": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Creates a new part.",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Rotate": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Rotates an existing part ccw.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "angle",
+            "in": "query",
+            "description": "Angle (radian) of rotation (ccw)",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/MoveToOrigin": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Moves an existing part to origin.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Mirror": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Mirrors the part over X or Y axis.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overY",
+            "in": "query",
+            "description": "Mirror over Y axis (true) or over X axis (false)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Copy": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Creates a copy from an existing part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newPartName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Update": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Updates a part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.UpdatePartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IPartInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Rename": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Renames a part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Delete": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Deletes a part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/ExportToStl": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Export given part to SLT file.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of exported part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Destination path for export",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/Image": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Gets the part image as PNG.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sizeX",
+            "in": "query",
+            "description": "Size x",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sizeY",
+            "in": "query",
+            "description": "Size y",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/GetAllPartUris": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Gets a list of all part URIs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/SetCuttingTechnology": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Sets the cutting technology on the part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CuttingTechnologyInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CuttingTechnologyInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CuttingTechnologyInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CuttingTechnologyInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/SetBendingTechnology": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Sets the bending technology on the part",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "calculateDeduction",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "calculateBendingTime",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/SetGrippers": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Set grippers on the part.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of a part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "replaceExistingPicks",
+            "in": "query",
+            "description": "Should existing  picks be appended or replaced",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TechnologyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/ImportPartGeometry": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Imports geometry into the part",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of the part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Path to the file with the geometry",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Import parameters",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ImportPartInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ImportPartInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ImportPartInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ImportPartInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/ImportPart": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Imports file containig part definition (like .dxf or .step)",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Path to the input file",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subdirectory",
+            "in": "query",
+            "description": "subdirectory to write imported part",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/ImportPartGeometryWithImportConfiguration": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Imports part geometry using import configuration from BySoftCAM Administrator",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of the part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Path to the file with the geometry",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "importConfigurationName",
+            "in": "query",
+            "description": "Import configuration name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/Parts/ExportToDxf": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Export given part to DXF file.",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "description": "Uri of exported part",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "description": "Destination path for export",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "DXF format",
+            "schema": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.ApiService.Model.DxfFormat"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/System/StartBySoft": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Starts BySoft CAM",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/Begin": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Starts the temporary processing of part jobs.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/End": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Stops the temporary processing of part jobs.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/Create": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Creates a new temporary part job and returns the Id of the temporary part job.",
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.CreatePartJobInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/Nest": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Nests a temporary part job and returns the created nestings.",
+        "parameters": [
+          {
+            "name": "partJobId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.ITempPartPlan"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.ITempPartPlan"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.ITempPartPlan"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/Use": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Uses a temporary part job to update an existing part job.",
+        "parameters": [
+          {
+            "name": "partJobId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partJobUri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/Save": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Saves a temporary part job persistent in data storage and returns the URI.",
+        "parameters": [
+          {
+            "name": "partJobId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/TempPartJobs/RemovePlans": {
+      "post": {
+        "tags": [
+          "TempPartJobs"
+        ],
+        "summary": "Removes plans from a temporary part job.",
+        "parameters": [
+          {
+            "name": "partJobId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planReferenceIds",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Bystronic.BySoft.Api.Interface.AutoPartAssemblyState": {
+        "enum": [
+          "New",
+          "Working",
+          "Successful",
+          "Failed"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartComponentExportState": {
+        "enum": [
+          "None",
+          "Ok",
+          "Failed",
+          "Unavailable"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartComponentType": {
+        "enum": [
+          "None",
+          "FlatPart",
+          "BendingPart",
+          "Other"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartComponentUnfoldState": {
+        "enum": [
+          "None",
+          "Succeeded",
+          "Warning",
+          "Error"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartComponentWorkingState": {
+        "enum": [
+          "None",
+          "Queued",
+          "Working"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartErpImportState": {
+        "enum": [
+          "None",
+          "Ok",
+          "Warning"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartAssemblyUnfoldInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Folder": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "AssemblyState": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartAssemblyState"
+          },
+          "ErpImportState": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartErpImportState"
+          },
+          "ComponentInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartComponentInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartComponentInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "NominalCounter": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "PartStateMessage": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "GeometryStateMessage": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "CuttingTechStateMessage": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "BendingTechStateMessage": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ComponentType": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartComponentType"
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "ExportState": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartComponentExportState"
+          },
+          "ExportStateMessage": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Validated": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "UnfoldState": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartComponentUnfoldState"
+          },
+          "UnfoldMessages": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "WorkingState": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartComponentWorkingState"
+          },
+          "RotationAllowance": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "EnforcedKFactor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "IsBendingCalulated": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "IsCuttingCalculated": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartProjectBatchUnfoldInfo": {
+        "type": "object",
+        "properties": {
+          "AssemblyUnfoldInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartAssemblyUnfoldInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.AutoPartProjects.IAutoPartProjectInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.AutomaticQRPlacementData": {
+        "enum": [
+          "None",
+          "Name",
+          "Weight",
+          "Area",
+          "Thickness",
+          "Material",
+          "CuttingMachine",
+          "BendingMachine"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.BarCodeType": {
+        "enum": [
+          "DataMatrix",
+          "QR_Code",
+          "Barcode"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.BendJobs.IBendJobInfo": {
+        "type": "object",
+        "properties": {
+          "BendingMachineName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "BendJobParts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.BendJobs.IBendJobPartInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.BendJobs.IBendJobPartInfo": {
+        "type": "object",
+        "properties": {
+          "PartName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartUri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Length": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Width": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "CuttingLength": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "NumberOfContours": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "CuttingGas": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "LargeImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.ConsiderFreeCutsOptions": {
+        "enum": [
+          "Default",
+          "No",
+          "Yes"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.FileHandling": {
+        "enum": [
+          "Ignore",
+          "Overwrite",
+          "AddIndex"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.IBendLineInfo": {
+        "type": "object",
+        "properties": {
+          "Length": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Angle": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Radius": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "KFactor": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IBendingMachineInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "SupportsJobHandling": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.ICuttingMachineInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IMaterialInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Density": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IPartInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "BendingMachineName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Length": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Width": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "EffectiveArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "ExteriorArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "RectangularArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "EffectiveWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "ExteriorWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "RectangularWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalCuttingTimeSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "TotalBendingTimeSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "BendingRotationsCountAxisX": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "BendingRotationsCountAxisY": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "BendingRotationsCountAxisZ": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "SmallImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "LargeImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "LargeImagePng3D": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "NumberOfEmployees": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "BendLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IBendLineInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "CuttingLength": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "NumberOfContours": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "CuttingGas": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "ToolSetups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolSetupInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "NcParameterFile": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IStationPairInfo": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TopTool": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          },
+          "LowerTopToolAdapter": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          },
+          "UpperTopToolAdapter": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          },
+          "BottomTool": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          },
+          "LowerBottomToolAdapter": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          },
+          "UpperBottomToolAdapter": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IToolInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "SegmentTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IToolSegmentInfo"
+            },
+            "nullable": true
+          },
+          "Segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IToolSegmentInfo": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.IToolSetupInfo": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Stations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.IStationPairInfo"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.KFactorSource": {
+        "enum": [
+          "FromFile",
+          "FromSettings",
+          "UserDefined",
+          "None"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.MeasurementSystem": {
+        "enum": [
+          "Metric",
+          "English"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.NewPartModule": {
+        "enum": [
+          "PartEditor",
+          "Designer2D",
+          "Designer3D"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.INestPart": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Used": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.INestPartInfo": {
+        "type": "object",
+        "properties": {
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartUri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Used": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Length": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Width": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "CuttingLength": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "NumberOfContours": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "CuttingGas": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "RotationAllowance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "DiscreteRotations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "SameOrientation": {
+            "type": "boolean"
+          },
+          "MirroringAllowed": {
+            "type": "boolean"
+          },
+          "FillerPart": {
+            "type": "boolean"
+          },
+          "TestPart": {
+            "type": "boolean"
+          },
+          "SheetFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "PartInCluster": {
+            "type": "boolean"
+          },
+          "UniqueInCluster": {
+            "type": "boolean"
+          },
+          "CommonCutAllowed": {
+            "type": "boolean"
+          },
+          "CommonCutMatching": {
+            "type": "boolean"
+          },
+          "ConsiderFreeCuts": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ConsiderFreeCutsOptions"
+          },
+          "AllowNestingForFlexibleTandemPicks": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "RectangularArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "EffectiveArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "ExteriorArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "AreaWithEffectiveWaste": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "RectangularWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "EffectiveWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "ExteriorWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.INestSheetInfo": {
+        "type": "object",
+        "properties": {
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ResidualSheetUri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ResidualSheetGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Used": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "SizeX": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SizeY": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "MarginLeft": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "MarginRight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "MarginTop": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "MarginBottom": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IPartJobInfo": {
+        "type": "object",
+        "properties": {
+          "MaterialName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalWaste": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalWasteWithoutInnerContours": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalEffectiveWaste": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalEffectiveWasteWithoutInnerContours": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "TotalCuttingTimeSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "TotalTimeSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "NestParts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.INestPartInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "NestSheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.INestSheetInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartPlans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPartPlanInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "SmallImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "LargeImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "StackingSiteInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SortingJobs.IStackingSiteInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IPartJobValidationInfo": {
+        "type": "object",
+        "properties": {
+          "Plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IPlanValidationInfo"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IPartPlanInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Multiplicity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TotalCuttingTimeSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UsedSheetArea": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UsedSheetSizeX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UsedSheetSizeY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UsedSheetWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "SmallImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "LargeImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "NestSheetInfo": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.INestSheetInfo"
+          },
+          "NestPartInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.INestPartInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "ResidualSheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IResidualSheet"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IPartValidationInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "State": {
+            "type": "string",
+            "nullable": true
+          },
+          "GeometryState": {
+            "type": "string",
+            "nullable": true
+          },
+          "CuttingState": {
+            "type": "string",
+            "nullable": true
+          },
+          "BendingState": {
+            "type": "string",
+            "nullable": true
+          },
+          "GeometryDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IValidationDetail"
+            },
+            "nullable": true
+          },
+          "CuttingDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IValidationDetail"
+            },
+            "nullable": true
+          },
+          "BendingDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IValidationDetail"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IPlanValidationInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "State": {
+            "type": "string",
+            "nullable": true
+          },
+          "Details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IValidationDetail"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IResidualSheet": {
+        "type": "object",
+        "properties": {
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "SizeX": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SizeY": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SurfaceArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Weight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "HasCutOuts": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.ITempPartPlan": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Multiplicity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Material": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "CuttingMachine": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "CuttingTime": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "SheetReferenceId": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "SheetSizeX": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SheetSizeY": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SheetWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "UsedSheetWeight": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "SheetArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "UsedSheetArea": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "BoundsMaxX": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "BoundsMaxY": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "Waste": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "EffectiveWaste": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "UsedParts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.INestPart"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "ResidualSheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.PartJobs.IResidualSheet"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.PartJobs.IValidationDetail": {
+        "type": "object",
+        "properties": {
+          "State": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.SettingsProvider": {
+        "enum": [
+          "None",
+          "Template",
+          "SettingsManager"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.SortingJobs.IStackingAreaInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Type": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.SortingJobs.IStackingSiteInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "PartPlanRefereceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "UsedStackingAreas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SortingJobs.IStackingAreaInfo"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Interface.TechnologyStatus": {
+        "enum": [
+          "Ok",
+          "Warning",
+          "Error"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Interface.TextAlignment": {
+        "enum": [
+          "TopLeft",
+          "TopCenter",
+          "TopRight",
+          "MiddleLeft",
+          "MiddleCenter",
+          "MiddleRight",
+          "BottomLeft",
+          "BottomCenter",
+          "BottomRight"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Model.AddBendJobPartInfo": {
+        "type": "object",
+        "properties": {
+          "PartUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "PartGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.AddNestPartInfo": {
+        "type": "object",
+        "properties": {
+          "PartUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "PartGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "NestingSettings": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.PartNestingSettingsInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.AddNestSheetInfo": {
+        "type": "object",
+        "properties": {
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChargeInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "ArticleInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaterialInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "SizeX": {
+            "type": "number",
+            "format": "double"
+          },
+          "SizeY": {
+            "type": "number",
+            "format": "double"
+          },
+          "ResidualSheetUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "ResidualSheetGuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MarginLeft": {
+            "type": "number",
+            "format": "double"
+          },
+          "MarginRight": {
+            "type": "number",
+            "format": "double"
+          },
+          "MarginTop": {
+            "type": "number",
+            "format": "double"
+          },
+          "MarginBottom": {
+            "type": "number",
+            "format": "double"
+          },
+          "LoadOffsetX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "LoadOffsetY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.AutoPartAssemblyInfo": {
+        "type": "object",
+        "properties": {
+          "FileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "DefaultMaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "DataStorage": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "OrderInformation": {
+            "type": "string",
+            "nullable": true
+          },
+          "MeasurementSystem": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.MeasurementSystem"
+          },
+          "KFactorSource": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.KFactorSource"
+          },
+          "EnforcedKFactor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "UnfoldBodiesTogether": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.AutoPartDxfExportSettingsInfo": {
+        "type": "object",
+        "properties": {
+          "ExportType": {
+            "type": "string",
+            "nullable": true
+          },
+          "LayerConfigName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ExportPath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.ClusterPartSettingsInfo": {
+        "type": "object",
+        "properties": {
+          "MaxWidth": {
+            "type": "number",
+            "format": "double"
+          },
+          "MaxHeight": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CreateAutoPartProjectInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "SettingsProvider": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SettingsProvider"
+          },
+          "TemplateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Subdirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "ExtractPartsFromMultiPartFile": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "UseCadMaterial": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SetGripperAutomatically": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "EnableLogging": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "LogOutputDirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "UsePropertyName": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "PropertyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "PropertyGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "AutomaticQrCodePlacement": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "AutomaticQrValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.AutomaticQRPlacementData"
+            },
+            "nullable": true
+          },
+          "AutomaticQrGridSize": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MoveToOrigin": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "AddFreeCuts": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "FreeCutSettings": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.FreeCutSettingsInfo"
+          },
+          "DetectClusterPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ClusterPartSettings": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ClusterPartSettingsInfo"
+          },
+          "Texts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.TextInfo"
+            },
+            "nullable": true
+          },
+          "DataMatrices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.DataMatrixInfo"
+            },
+            "nullable": true
+          },
+          "CalculateCuttingTime": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CuttingWizardAutomatic": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "CuttingProcessGas": {
+            "type": "string",
+            "nullable": true
+          },
+          "UseCuttingGasTypeFromCuttingTable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CalculateDeduction": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CalculateBendingTime": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "BendingMachineNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "StopAfterImport": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "StopAfterBendTech": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "StopAfterCuttingTech": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SetBendTech": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SetCuttingTech": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ExportBendParts": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "KFactor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "UseDefinedKFactor": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "MaxPartThickness": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MaxBendRadius": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "FileHandling": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.FileHandling"
+          },
+          "CreateSubFolders": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "Assemblies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AutoPartAssemblyInfo"
+            },
+            "nullable": true
+          },
+          "AutoPartDxfExportSettingsInfo": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AutoPartDxfExportSettingsInfo"
+          },
+          "DefaultPartsStorage": {
+            "type": "string",
+            "nullable": true
+          },
+          "UseValidationFlagsFromSettingsManager": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "EnableAssemblyConfiguration": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CreateBendJobInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "SettingsProvider": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SettingsProvider"
+          },
+          "TemplateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Subdirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "BendingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "BendJobParts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddBendJobPartInfo"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CreatePartInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "SettingsProvider": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SettingsProvider"
+          },
+          "TemplateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Subdirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "BendingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double"
+          },
+          "Links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "CuttingGasName": {
+            "type": "string",
+            "nullable": true
+          },
+          "NcParameterFile": {
+            "type": "string",
+            "nullable": true
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "RotationAllowance": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "DiscreteRotations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "MirroringAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "UsedAsClusterPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutMatching": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "FillerPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SameOrientation": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TestPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "PartUniqueInCluster": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ConsiderFreeCuts": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ConsiderFreeCutsOptions"
+          },
+          "AllowNestingForFlexibleTandemPicks": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SheetFormatSizeX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "SheetFormatSizeY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Released": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CreatePartJobInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "SettingsProvider": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.SettingsProvider"
+          },
+          "TemplateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Subdirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double"
+          },
+          "CuttingProcessGas": {
+            "type": "string",
+            "nullable": true
+          },
+          "SemiFinished": {
+            "type": "boolean"
+          },
+          "NestParts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestPartInfo"
+            },
+            "nullable": true
+          },
+          "NestSheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.AddNestSheetInfo"
+            },
+            "nullable": true
+          },
+          "Released": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CreateResidualSheetInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double"
+          },
+          "SheetQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "SheetMargin": {
+            "type": "number",
+            "format": "double"
+          },
+          "SizeX": {
+            "type": "number",
+            "format": "double"
+          },
+          "SizeY": {
+            "type": "number",
+            "format": "double"
+          },
+          "StorageName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ArticleNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChargeNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "Subdirectory": {
+            "type": "string",
+            "nullable": true
+          },
+          "LoadOffsetX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "LoadOffsetY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.CuttingTechnologyInfo": {
+        "type": "object",
+        "properties": {
+          "CalculateCuttingTime": {
+            "type": "boolean"
+          },
+          "NoCuttingTechnologyOnOuterContour": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.DataMatrixInfo": {
+        "type": "object",
+        "properties": {
+          "Text": {
+            "type": "string",
+            "nullable": true
+          },
+          "PositionX": {
+            "type": "number",
+            "format": "double"
+          },
+          "PositionY": {
+            "type": "number",
+            "format": "double"
+          },
+          "Rotation": {
+            "type": "number",
+            "format": "double"
+          },
+          "Size": {
+            "type": "number",
+            "format": "double"
+          },
+          "BarCodeType": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.BarCodeType"
+          },
+          "IntelligentPlacement": {
+            "type": "boolean"
+          },
+          "SafetyDistance": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.FreeCutSettingsInfo": {
+        "type": "object",
+        "properties": {
+          "MaxWidth": {
+            "type": "number",
+            "format": "double"
+          },
+          "MinDepth": {
+            "type": "number",
+            "format": "double"
+          },
+          "ContourDistance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.IResidualSheetInfo": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double"
+          },
+          "SheetQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MarginBottom": {
+            "type": "number",
+            "format": "double"
+          },
+          "MarginLeft": {
+            "type": "number",
+            "format": "double"
+          },
+          "MarginRight": {
+            "type": "number",
+            "format": "double"
+          },
+          "EffectiveMarginTop": {
+            "type": "number",
+            "format": "double"
+          },
+          "SizeX": {
+            "type": "number",
+            "format": "double"
+          },
+          "SizeY": {
+            "type": "number",
+            "format": "double"
+          },
+          "SurfaceArea": {
+            "type": "number",
+            "format": "double"
+          },
+          "StorageName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ArticleNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChargeNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "SerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "SmallImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "LargeImagePng": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.ImportPartInfo": {
+        "type": "object",
+        "properties": {
+          "ScaleFactor": {
+            "type": "number",
+            "format": "double"
+          },
+          "ContourTolerance": {
+            "type": "number",
+            "format": "double"
+          },
+          "MoveToOrigin": {
+            "type": "boolean"
+          },
+          "DeleteDuplicatedElements": {
+            "type": "boolean"
+          },
+          "AutoRotation": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Model.ImportPartInfo+AutoRotationEnum"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.ImportPartInfo+AutoRotationEnum": {
+        "enum": [
+          "None",
+          "WideSide",
+          "NarrowSide"
+        ],
+        "type": "string",
+        "format": ""
+      },
+      "Bystronic.BySoft.Api.Model.PartNestingSettingsInfo": {
+        "type": "object",
+        "properties": {
+          "Priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "RotationAllowance": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "DiscreteRotations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "MirroringAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "UsedAsClusterPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutMatching": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "FillerPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SameOrientation": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TestPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "PartUniqueInCluster": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ConsiderFreeCuts": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ConsiderFreeCutsOptions"
+          },
+          "AllowNestingForFlexibleTandemPicks": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SheetFormatSizeX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "SheetFormatSizeY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.RemoveBendJobPartInfo": {
+        "type": "object",
+        "properties": {
+          "PartName": {
+            "type": "string",
+            "nullable": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.TechnologyInfo": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.TechnologyStatus"
+          },
+          "Message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.TextInfo": {
+        "type": "object",
+        "properties": {
+          "Text": {
+            "type": "string",
+            "nullable": true
+          },
+          "PositionX": {
+            "type": "number",
+            "format": "double"
+          },
+          "PositionY": {
+            "type": "number",
+            "format": "double"
+          },
+          "Rotation": {
+            "type": "number",
+            "format": "double"
+          },
+          "FontName": {
+            "type": "string",
+            "nullable": true
+          },
+          "FontSize": {
+            "type": "number",
+            "format": "double"
+          },
+          "IntelligentPlacement": {
+            "type": "boolean"
+          },
+          "SafetyDistance": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Mirror": {
+            "type": "boolean"
+          },
+          "Bold": {
+            "type": "boolean"
+          },
+          "Italic": {
+            "type": "boolean"
+          },
+          "PlaceAtCoG": {
+            "type": "boolean"
+          },
+          "IsHelpText": {
+            "type": "boolean"
+          },
+          "Alignment": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.TextAlignment"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.UpdateBendJobInfo": {
+        "type": "object",
+        "properties": {
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.UpdateBendJobPartInfo": {
+        "type": "object",
+        "properties": {
+          "PartName": {
+            "type": "string",
+            "nullable": true
+          },
+          "OrderInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "NewQuantity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.UpdatePartInfo": {
+        "type": "object",
+        "properties": {
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "CuttingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "BendingMachineName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Thickness": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "CuttingGasName": {
+            "type": "string",
+            "nullable": true
+          },
+          "NcParameterFile": {
+            "type": "string",
+            "nullable": true
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "RotationAllowance": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "DiscreteRotations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "MirroringAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "UsedAsClusterPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutAllowed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CommonCutMatching": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "FillerPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SameOrientation": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TestPart": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "PartUniqueInCluster": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ConsiderFreeCuts": {
+            "$ref": "#/components/schemas/Bystronic.BySoft.Api.Interface.ConsiderFreeCutsOptions"
+          },
+          "AllowNestingForFlexibleTandemPicks": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SheetFormatSizeX": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "SheetFormatSizeY": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Released": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.UpdatePartJobInfo": {
+        "type": "object",
+        "properties": {
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo1": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo2": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo3": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo4": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo5": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo6": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo7": {
+            "type": "string",
+            "nullable": true
+          },
+          "UserInfo8": {
+            "type": "string",
+            "nullable": true
+          },
+          "Released": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.Api.Model.UpdateResidualSheetInfo": {
+        "type": "object",
+        "properties": {
+          "SheetQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "StorageName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ArticleNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChargeNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.ApiService.Model.DxfFormat": {
+        "enum": [
+          "Designer",
+          "AutoCad",
+          "CyCad"
+        ],
+        "type": "string",
+        "description": "Supported DXF formats",
+        "format": ""
+      },
+      "Bystronic.BySoft.ApiService.Model.ObjectInfoWrapper": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Guid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Bystronic.BySoft.PartEditor.Helper.PartEditorContext": {
+        "enum": [
+          "Import",
+          "Part",
+          "Geometry",
+          "CutTechnology",
+          "CuttimeCalculation",
+          "Tools",
+          "BendingSequence",
+          "ToolSetup",
+          "BackStops",
+          "LiftingAid",
+          "AngleMeasurementSystem",
+          "Compensation",
+          "Correction",
+          "BendExport",
+          "Sort",
+          "Drilling"
+        ],
+        "type": "string",
+        "format": ""
+      }
+    }
+  }
+}
