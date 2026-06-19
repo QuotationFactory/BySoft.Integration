@@ -142,7 +142,19 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         {
             throw new ApplicationException($"PartInfo with name {partName} cannot be retrieved from BySoft system.");
         }
-        var args = CreateUpdatePartArgs(request, partInfoBysoft);
+
+        UpdatePartArgs args;
+        try
+        {
+            // when an exception is thrown here, we delete the part to avoid leaving a part in BySoft with wrong data
+            args = CreateUpdatePartArgs(request, partInfoBysoft);
+        }
+        catch (Exception)
+        {
+            await _bySoftApi.DeletePartAsync(partUri);
+            throw;
+        }
+
         await _bySoftApi.UpdatePartAsync(partUri, args);
 
         // 6. Add Bending technology => This is also the *initial* check of manufacturability
@@ -200,7 +212,7 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
 
     private static bool HasBendingActivity(RequestManufacturabilityCheckOfPartTypeMessage request)
     {
-        return request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending);
+        return request.PartType.Activities.Any(x => x.WorkingStepType == WorkingStepTypeV1.SheetBending) && !IsDxfOrDwg(request.PartType);
     }
 
     private string MoveAndRenameGeometryFile(string geometryFileInputPath, string subDirectory, RequestManufacturabilityCheckOfPartTypeMessage request)
@@ -546,9 +558,9 @@ public class BySoftManufacturabilityCheck : IBySoftManufacturabilityCheck
         return cuttingMachineName;
     }
 
-    private bool IsDxfOrDwg(PartTypeV1 part) => !string.IsNullOrWhiteSpace(part.OriginalFileName)
-                                                           && (Path.GetExtension(part.OriginalFileName).Equals(".dxf", StringComparison.OrdinalIgnoreCase)
-                                                               || Path.GetExtension(part.OriginalFileName).Equals(".dwg", StringComparison.OrdinalIgnoreCase));
+    private static bool IsDxfOrDwg(PartTypeV1 part) => !string.IsNullOrWhiteSpace(part.OriginalFileName)
+                                                       && (Path.GetExtension(part.OriginalFileName).Equals(".dxf", StringComparison.OrdinalIgnoreCase)
+                                                           || Path.GetExtension(part.OriginalFileName).Equals(".dwg", StringComparison.OrdinalIgnoreCase));
 
     private double? GetThickness(RequestManufacturabilityCheckOfPartTypeMessage request, PartInfo partInfo)
     {
