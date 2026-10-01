@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <MicrosoftExtensionsVersion>9.0.0</MicrosoftExtensionsVersion>
-    <MicrosoftExtensionsPatchVersion>9.0.11</MicrosoftExtensionsPatchVersion>
+    <MicrosoftExtensionsPatchVersion>9.0.20</MicrosoftExtensionsPatchVersion>
   </PropertyGroup>
 
   <ItemGroup>
