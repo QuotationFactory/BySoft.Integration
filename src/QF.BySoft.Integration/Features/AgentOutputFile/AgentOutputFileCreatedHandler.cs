@@ -1,12 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using QF.BySoft.Integration.Features.BySoftIntegration;
 
 namespace QF.BySoft.Integration.Features.AgentOutputFile;
 
-public class AgentOutputFileCreatedHandler : INotificationHandler<AgentOutputFileCreated>
+public class AgentOutputFileCreatedHandler
 {
     private readonly IBySoftIntegration _bySoftIntegration;
     private readonly ILogger<AgentOutputFileCreatedHandler> _logger;
@@ -19,7 +18,7 @@ public class AgentOutputFileCreatedHandler : INotificationHandler<AgentOutputFil
         _bySoftIntegration = bySoftIntegration;
     }
 
-    public async Task Handle(AgentOutputFileCreated notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(AgentOutputFileCreated notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("File created: {FilePath}", notification.FilePath);
 
