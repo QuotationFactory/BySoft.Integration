@@ -15,8 +15,6 @@
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <PackageVersion Include="ClosedXML" Version="0.104.2" />
     <PackageVersion Include="FluentAssertions" Version="8.8.0" />
-    <PackageVersion Include="MediatR" Version="12.5.0" />
-    <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsPatchVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsPatchVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="$(MicrosoftExtensionsPatchVersion)" />

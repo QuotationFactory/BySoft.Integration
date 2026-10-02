@@ -7,11 +7,10 @@ public static class DependencyInjectionExtensions
 {
     public static void AddFileWatchFeature(this IServiceCollection services)
     {
+        // register agent output file created handler
+        services.AddTransient<AgentOutputFileCreatedHandler>();
 
         // register agent output file watcher service
         services.AddHostedService<AgentOutputFileWatcherService>();
-
-        // register MediatR with current assembly
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AgentOutputFileWatcherService).Assembly));
     }
 }

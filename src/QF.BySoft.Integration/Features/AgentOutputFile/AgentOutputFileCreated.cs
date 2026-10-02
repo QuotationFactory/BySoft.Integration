@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace QF.BySoft.Integration.Features.AgentOutputFile;
 
-namespace QF.BySoft.Integration.Features.AgentOutputFile;
-
-public class AgentOutputFileCreated : INotification
+public class AgentOutputFileCreated
 {
     public AgentOutputFileCreated(string filePath)
     {
