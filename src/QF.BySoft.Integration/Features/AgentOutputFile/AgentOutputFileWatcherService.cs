@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QF.BySoft.Entities;
@@ -15,15 +17,15 @@ namespace QF.BySoft.Integration.Features.AgentOutputFile;
 public class AgentOutputFileWatcherService : FileWatcherService
 {
     private readonly ILogger<AgentOutputFileWatcherService> _logger;
-    private readonly AgentOutputFileCreatedHandler _handler;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public AgentOutputFileWatcherService(
-        AgentOutputFileCreatedHandler handler,
+        IServiceScopeFactory serviceScopeFactory,
         IOptions<BySoftIntegrationSettings> options,
         ILogger<AgentOutputFileWatcherService> logger)
     {
-        _handler = handler;
+        _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
 
         // add file watcher to the agent output directory
@@ -48,7 +50,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
-                    await _handler.HandleAsync(new AgentOutputFileCreated(e.FullPath), CancellationToken.None);
+                    await HandleCreatedFileAsync(e.FullPath, CancellationToken.None);
                     break;
                 case WatcherChangeTypes.Deleted:
                 case WatcherChangeTypes.Changed:
@@ -84,7 +86,7 @@ public class AgentOutputFileWatcherService : FileWatcherService
                 case WatcherChangeTypes.Renamed:
                     break;
                 case WatcherChangeTypes.All:
-                    await _handler.HandleAsync(new AgentOutputFileCreated(e.FullPath), CancellationToken.None);
+                    await HandleCreatedFileAsync(e.FullPath, CancellationToken.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -98,5 +100,12 @@ public class AgentOutputFileWatcherService : FileWatcherService
         {
             _semaphore.Release();
         }
+    }
+
+    private async Task HandleCreatedFileAsync(string filePath, CancellationToken cancellationToken)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var handler = scope.ServiceProvider.GetRequiredService<AgentOutputFileCreatedHandler>();
+        await handler.HandleAsync(new AgentOutputFileCreated(filePath), cancellationToken);
     }
 }

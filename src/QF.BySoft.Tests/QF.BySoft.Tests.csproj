@@ -11,7 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Moq" />
     <PackageReference Include="Moq.Contrib.HttpClient" />
     <PackageReference Include="xunit" />
@@ -22,7 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\QF.BySoft.Integration\QF.BySoft.Integration.csproj" />
     <ProjectReference Include="..\QF.BySoft.Manufacturability\QF.BySoft.Manufacturability.csproj" />
+    <ProjectReference Include="..\QF.Integration.Common\QF.Integration.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
